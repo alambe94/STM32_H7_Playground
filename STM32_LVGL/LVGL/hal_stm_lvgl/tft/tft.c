@@ -14,13 +14,12 @@
 #include "tft.h"
 #include "stm32h7xx.h"
 #include "stm32h7b3i_discovery.h"
-#include "stm32h7b3i_discovery_sdram.h"
 #include "stm32h7b3i_discovery_ts.h"
+#include "stm32h7b3i_discovery_lcd.h"
+#include "stm32h7b3i_discovery_sdram.h"
 #include "../Components/rk043fn48h/rk043fn48h.h"
 
 #include "dma.h"
-#include "dma2d.h"
-#include "ltdc.h"
 /*********************
  *      DEFINES
  *********************/
@@ -36,26 +35,6 @@
 #define LCD_ERROR                       ((uint8_t)0x01)
 #define LCD_TIMEOUT                     ((uint8_t)0x02)
 
-/**
-  * @brief LCD special pins
-  */
-/* Display enable pin */
-#define LCD_DISP_PIN                    GPIO_PIN_12
-#define LCD_DISP_GPIO_PORT              GPIOI
-#define LCD_DISP_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOI_CLK_ENABLE()
-#define LCD_DISP_GPIO_CLK_DISABLE()     __HAL_RCC_GPIOI_CLK_DISABLE()
-
-/* Backlight control pin */
-#define LCD_BL_CTRL_PIN                  GPIO_PIN_3
-#define LCD_BL_CTRL_GPIO_PORT            GPIOK
-#define LCD_BL_CTRL_GPIO_CLK_ENABLE()    __HAL_RCC_GPIOK_CLK_ENABLE()
-#define LCD_BL_CTRL_GPIO_CLK_DISABLE()   __HAL_RCC_GPIOK_CLK_DISABLE()
-
-#define CPY_BUF_DMA_STREAM               DMA2_Stream0
-#define CPY_BUF_DMA_CHANNEL              DMA_CHANNEL_0
-#define CPY_BUF_DMA_STREAM_IRQ           DMA2_Stream0_IRQn
-#define CPY_BUF_DMA_STREAM_IRQHANDLER    DMA2_Stream0_IRQHandler
-
 /**********************
  *      TYPEDEFS
  **********************/
@@ -70,8 +49,6 @@ static void ex_disp_flush(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t 
 #endif
 
 static uint8_t LCD_Init(void);
-static void LCD_LayerRgb565Init(uint32_t FB_Address);
-static void LCD_DisplayOn(void);
 
 static void DMA_Config(void);
 static void DMA_TransferComplete(DMA_HandleTypeDef *han);
@@ -124,12 +101,6 @@ void tft_init(void)
     /* LCD Initialization */
     LCD_Init();
 
-    /* LCD Initialization */
-    LCD_LayerRgb565Init((uint32_t)my_fb);
-
-    /* Enable the LCD */
-    LCD_DisplayOn();
-
     DMA_Config();
 
 #if LV_USE_GPU != 0
@@ -157,8 +128,8 @@ void tft_init(void)
 	/*Set up the functions to access to your display*/
 
 	/*Set the resolution of the display*/
-	disp_drv.hor_res = 480;
-	disp_drv.ver_res = 272;
+	disp_drv.hor_res = LV_HOR_RES_MAX;
+	disp_drv.ver_res = LV_VER_RES_MAX;
 
 	/*Used to copy the buffer's content to the display*/
 	disp_drv.flush_cb = ex_disp_flush;
@@ -222,23 +193,6 @@ static void ex_disp_flush(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t 
     }
 }
 
-
-/**
- * @brief Configure LCD pins, and peripheral clocks.
- */
-static void LCD_MspInit(void)
-{
-	//TODO
-}
-
-/**
- * @brief Configure LTDC PLL.
- */
-static void LCD_ClockConfig(void)
-{
-	//TODO
-}
-
 /**
   * @brief  Initializes the LCD.
   * @retval LCD state
@@ -247,7 +201,7 @@ static uint8_t LCD_Init(void)
 {
     /* Select the used LCD */
 
-	//TODO
+	BSP_LCD_InitEx(0, LCD_ORIENTATION_LANDSCAPE, LCD_PIXEL_FORMAT_RGB565, LV_HOR_RES_MAX, LV_VER_RES_MAX);
 
     uint32_t i;
     for(i = 0; i < (TFT_HOR_RES * TFT_VER_RES) ; i++)
@@ -258,19 +212,13 @@ static uint8_t LCD_Init(void)
     return LCD_OK;
 }
 
-static void LCD_LayerRgb565Init(uint32_t FB_Address)
-{
-	//TODO
-}
-
-static void LCD_DisplayOn(void)
-{
-	//TODO
-}
-
 static void DMA_Config(void)
 {
-	//TODO
+	// configured in cube
+
+    /*##-5- Select Callbacks functions called after Transfer complete and Transfer error */
+    HAL_DMA_RegisterCallback(&hdma_memtomem_dma1_stream0, HAL_DMA_XFER_CPLT_CB_ID, DMA_TransferComplete);
+    HAL_DMA_RegisterCallback(&hdma_memtomem_dma1_stream0, HAL_DMA_XFER_ERROR_CB_ID, DMA_TransferError);
 }
 
 /**
@@ -296,8 +244,7 @@ static void DMA_TransferComplete(DMA_HandleTypeDef *han)
 #if LV_COLOR_DEPTH == 24 || LV_COLOR_DEPTH == 32
         length *= 2; /* STM32 DMA uses 16-bit chunks so multiply by 2 for 32-bit color */
 #endif
-        if(HAL_DMA_Start_IT(han,(uint32_t)buf_to_flush, (uint32_t)&my_fb[y_fill_act * TFT_HOR_RES + x1_flush],
-                            length) != HAL_OK)
+        if(HAL_DMA_Start_IT(han,(uint32_t)buf_to_flush, (uint32_t)&my_fb[y_fill_act * TFT_HOR_RES + x1_flush], length) != HAL_OK)
         {
             while(1);	/*Halt on error*/
         }

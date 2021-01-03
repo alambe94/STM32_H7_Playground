@@ -31,8 +31,8 @@ extern "C" {
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 #define FT5336_AUTO_CALIBRATION_ENABLED      0U
-#define FT5336_MAX_X_LENGTH                  800U
-#define FT5336_MAX_Y_LENGTH                  480U
+#define FT5336_MAX_X_LENGTH                  480U
+#define FT5336_MAX_Y_LENGTH                  272U
   
 #ifdef __cplusplus
 }

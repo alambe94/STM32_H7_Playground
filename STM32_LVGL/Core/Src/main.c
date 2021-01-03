@@ -20,13 +20,9 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "dma.h"
-#include "dma2d.h"
-#include "ltdc.h"
 #include "rtc.h"
-#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
-#include "fmc.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -102,19 +98,18 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
-  MX_LTDC_Init();
   MX_RTC_Init();
   MX_USART1_UART_Init();
-  MX_DMA2D_Init();
-  MX_TIM2_Init();
-  MX_FMC_Init();
   /* USER CODE BEGIN 2 */
   lv_init();
 
   tft_init();
   touchpad_init();
 
+  //lv_demo_music();
+  //lv_demo_stress();
   lv_demo_widgets();
+
   /* USER CODE END 2 */
 
   /* Infinite loop */

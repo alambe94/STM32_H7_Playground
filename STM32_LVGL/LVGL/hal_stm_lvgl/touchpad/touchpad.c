@@ -28,7 +28,7 @@ static bool touchpad_read(lv_indev_drv_t *drv, lv_indev_data_t *data);
 /**********************
  *  STATIC VARIABLES
  **********************/
-static TS_MultiTouch_State_t  TS_State;
+static TS_State_t  TS_State;
 
 /**********************
  *      MACROS
@@ -46,6 +46,8 @@ void touchpad_init(void)
 	TS_Init_t ts;
 	ts.Width = TFT_HOR_RES;
 	ts.Height = TFT_VER_RES;
+	ts.Orientation = TS_SWAP_XY;
+	ts.Accuracy = 8;
     BSP_TS_Init(0, &ts);
 
     lv_indev_drv_t indev_drv;                       /*Descriptor of an input device driver*/
@@ -74,10 +76,10 @@ static bool touchpad_read(lv_indev_drv_t *indev, lv_indev_data_t *data)
     static int16_t last_y = 0;
     BSP_LED_Toggle(LED2);
 
-    BSP_TS_Get_MultiTouchState(0, &TS_State);
+    BSP_TS_GetState(0, &TS_State);
     if(TS_State.TouchDetected) {
-            data->point.x = TS_State.TouchX[0];
-            data->point.y = TS_State.TouchY[0];
+            data->point.x = TS_State.TouchX;
+            data->point.y = TS_State.TouchY;
             last_x = data->point.x;
             last_y = data->point.y;
             data->state = LV_INDEV_STATE_PR;
