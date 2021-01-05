@@ -12,14 +12,9 @@
 #include <stdlib.h>
 
 #include "tft.h"
-#include "stm32h7xx.h"
-#include "stm32h7b3i_discovery.h"
-#include "stm32h7b3i_discovery_ts.h"
-#include "stm32h7b3i_discovery_lcd.h"
-#include "stm32h7b3i_discovery_sdram.h"
-#include "../Components/rk043fn48h/rk043fn48h.h"
 
 #include "dma.h"
+#include "ltdc.h"
 /*********************
  *      DEFINES
  *********************/
@@ -73,9 +68,7 @@ typedef uint32_t uintpixel_t;
 
 /* You can try to change buffer to internal ram by uncommenting line below and commenting
  * SDRAM one. */
-//static uintpixel_t my_fb[TFT_HOR_RES * TFT_VER_RES];
-
-static __IO uintpixel_t * my_fb = (__IO uintpixel_t*) (SDRAM_DEVICE_ADDR);
+static uintpixel_t my_fb[TFT_HOR_RES * TFT_VER_RES];
 
 static int32_t            x1_flush;
 static int32_t            y1_flush;
@@ -199,12 +192,9 @@ static void ex_disp_flush(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t 
   */
 static uint8_t LCD_Init(void)
 {
-    /* Select the used LCD */
+	HAL_LTDC_SetAddress(&hltdc, (uint32_t)my_fb, 0);
 
-	BSP_LCD_InitEx(0, LCD_ORIENTATION_LANDSCAPE, LCD_PIXEL_FORMAT_RGB565, LV_HOR_RES_MAX, LV_VER_RES_MAX);
-
-    uint32_t i;
-    for(i = 0; i < (TFT_HOR_RES * TFT_VER_RES) ; i++)
+    for(uint32_t i = 0; i < (TFT_HOR_RES * TFT_VER_RES) ; i++)
     {
         my_fb[i] = 0;
     }

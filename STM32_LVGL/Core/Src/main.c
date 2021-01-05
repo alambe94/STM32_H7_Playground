@@ -20,7 +20,12 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "dma.h"
+#include "i2c.h"
+#include "ltdc.h"
+#include "rtc.h"
+#include "usb_device.h"
 #include "gpio.h"
+#include "fmc.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -96,6 +101,11 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
+  MX_FMC_Init();
+  MX_I2C4_Init();
+  MX_LTDC_Init();
+  MX_RTC_Init();
+  MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
   lv_init();
 
@@ -105,7 +115,6 @@ int main(void)
   //lv_demo_music();
   //lv_demo_stress();
   lv_demo_widgets();
-
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -115,9 +124,8 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
-  HAL_Delay(5);
-  lv_task_handler();
+    HAL_Delay(5);
+    lv_task_handler();
   }
   /* USER CODE END 3 */
 }
@@ -140,14 +148,21 @@ void SystemClock_Config(void)
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE0);
 
   while(!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {}
+  /** Configure LSE Drive Capability
+  */
+  HAL_PWR_EnableBkUpAccess();
+  __HAL_RCC_LSEDRIVE_CONFIG(RCC_LSEDRIVE_LOW);
   /** Macro to configure the PLL clock source
   */
   __HAL_RCC_PLL_PLLSOURCE_CONFIG(RCC_PLLSOURCE_HSE);
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48|RCC_OSCILLATORTYPE_HSE
+                              |RCC_OSCILLATORTYPE_LSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
+  RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 12;
@@ -179,7 +194,8 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_LTDC|RCC_PERIPHCLK_I2C4
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_RTC|RCC_PERIPHCLK_LTDC
+                              |RCC_PERIPHCLK_I2C4|RCC_PERIPHCLK_USB
                               |RCC_PERIPHCLK_FMC;
   PeriphClkInitStruct.PLL2.PLL2M = 12;
   PeriphClkInitStruct.PLL2.PLL2N = 200;
@@ -192,17 +208,20 @@ void SystemClock_Config(void)
   PeriphClkInitStruct.PLL3.PLL3M = 24;
   PeriphClkInitStruct.PLL3.PLL3N = 192;
   PeriphClkInitStruct.PLL3.PLL3P = 17;
-  PeriphClkInitStruct.PLL3.PLL3Q = 2;
-  PeriphClkInitStruct.PLL3.PLL3R = 2;
+  PeriphClkInitStruct.PLL3.PLL3Q = 4;
+  PeriphClkInitStruct.PLL3.PLL3R = 20;
   PeriphClkInitStruct.PLL3.PLL3RGE = RCC_PLL3VCIRANGE_0;
   PeriphClkInitStruct.PLL3.PLL3VCOSEL = RCC_PLL3VCOMEDIUM;
   PeriphClkInitStruct.PLL3.PLL3FRACN = 0;
   PeriphClkInitStruct.FmcClockSelection = RCC_FMCCLKSOURCE_PLL2;
+  PeriphClkInitStruct.UsbClockSelection = RCC_USBCLKSOURCE_HSI48;
   PeriphClkInitStruct.I2c4ClockSelection = RCC_I2C4CLKSOURCE_D3PCLK1;
+  PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
   if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
   {
     Error_Handler();
   }
+  HAL_RCC_MCOConfig(RCC_MCO1, RCC_MCO1SOURCE_HSI48, RCC_MCODIV_2);
 }
 
 /* USER CODE BEGIN 4 */

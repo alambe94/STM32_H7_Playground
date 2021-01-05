@@ -32,8 +32,8 @@ ENTRY(Reset_Handler)
 /* Highest address of the user mode stack */
 _estack = ORIGIN(RAM) + LENGTH(RAM);	/* end of "RAM" Ram type memory */
 
-_Min_Heap_Size = 0x2000 ;	/* required amount of heap  */
-_Min_Stack_Size = 0x2000 ;	/* required amount of stack */
+_Min_Heap_Size = 0x200 ;	/* required amount of heap  */
+_Min_Stack_Size = 0x400 ;	/* required amount of stack */
 
 /* Memories definition */
 MEMORY
@@ -42,6 +42,7 @@ MEMORY
   ITCMRAM    (xrw)    : ORIGIN = 0x00000000,   LENGTH = 64K
   RAM    (xrw)    : ORIGIN = 0x24000000,   LENGTH = 1024K
   FLASH    (rx)    : ORIGIN = 0x8000000,   LENGTH = 2048K
+  SD_RAM (xrw)   : ORIGIN = 0xD0000000,   LENGTH = 8192K
 }
 
 /* Sections */
@@ -169,6 +170,11 @@ SECTIONS
     . = ALIGN(8);
   } >RAM
 
+  .sd_ram (NOLOAD) :
+  {
+      *(.SD_RAM);
+  } >SD_RAM
+  
   /* Remove information from the compiler libraries */
   /DISCARD/ :
   {
