@@ -261,6 +261,7 @@ NVIC.DebugMonitor_IRQn=true\:0\:0\:false\:false\:true\:false\:false
 NVIC.ForceEnableDMAVector=true
 NVIC.HardFault_IRQn=true\:0\:0\:false\:false\:true\:false\:false
 NVIC.JPEG_IRQn=true\:0\:0\:false\:false\:true\:true\:true
+NVIC.MDMA_IRQn=true\:0\:0\:false\:false\:true\:true\:true
 NVIC.MemoryManagement_IRQn=true\:0\:0\:false\:false\:true\:false\:false
 NVIC.NonMaskableInt_IRQn=true\:0\:0\:false\:false\:true\:false\:false
 NVIC.OTG_HS_IRQn=true\:0\:0\:false\:false\:true\:false\:true

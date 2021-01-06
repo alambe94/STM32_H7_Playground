@@ -330,7 +330,7 @@ static void DMA2D_Config(void)
 }
 #endif
 
-void *USB_UVC_Get_Frame_Buffer(void)
+void *LCD_Get_Frame_Buffer(void)
 {
 	return my_fb;
 }

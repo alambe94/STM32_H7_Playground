@@ -28,7 +28,7 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include  "usbd_ioreq.h"
 
-#define USBD_UVC_FORMAT_UNCOMPRESSED
+//#define USBD_UVC_FORMAT_UNCOMPRESSED
 
 /** @addtogroup STM32_USB_DEVICE_LIBRARY
   * @{
@@ -58,11 +58,11 @@ extern "C" {
 
 /* These defines shall be updated in the usbd_conf.h file */
 #ifndef UVC_WIDTH
-#define UVC_WIDTH                                     480U
+#define UVC_WIDTH                                     320U
 #endif /* UVC_WIDTH */
 
 #ifndef UVC_HEIGHT
-#define UVC_HEIGHT                                    272U
+#define UVC_HEIGHT                                    240U
 #endif /* UVC_HEIGHT */
 
 #ifndef UVC_CAM_FPS_FS
@@ -74,7 +74,7 @@ extern "C" {
 #endif /* UVC_CAM_FPS_HS */
 
 #ifndef UVC_PACKET_SIZE
-#define UVC_PACKET_SIZE                               1024U
+#define UVC_PACKET_SIZE                               512U
 #endif /* UVC_PACKET_SIZE */
 
 #ifndef UVC_MAX_FRAME_SIZE
@@ -116,7 +116,7 @@ extern "C" {
 #endif
 
 #ifndef UVC_ISO_HS_MPS
-#define UVC_ISO_HS_MPS                                1024U
+#define UVC_ISO_HS_MPS                                512U
 #endif
 
 #ifndef UVC_HEADER_PACKET_CNT
