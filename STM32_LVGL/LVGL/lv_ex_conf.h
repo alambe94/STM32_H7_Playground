@@ -1,7 +1,13 @@
 /**
  * @file lv_ex_conf.h
+ * Configuration file for v7.7.1
  *
  */
+/*
+ * COPY THIS FILE AS lv_ex_conf.h
+ */
+
+#if 1 /*Set it to "1" to enable the content*/
 
 #ifndef LV_EX_CONF_H
 #define LV_EX_CONF_H
@@ -28,12 +34,15 @@
 #define LV_USE_DEMO_PRINTER     0
 
 /*Demonstrate the usage of encoder and keyboard*/
-#define LV_USE_DEMO_KEYPAD_AND_ENCODER     0
+#define LV_USE_DEMO_KEYPAD_AND_ENCODER     1
 
 /*Benchmark your system*/
 #define LV_USE_DEMO_BENCHMARK   1
 
 /*Stress test for LVGL*/
 #define LV_USE_DEMO_STRESS      1
+
 #endif /*LV_EX_CONF_H*/
+
+#endif /*End of "Content enable"*/
 

@@ -20,8 +20,6 @@
 #include "../lv_misc/lv_fs.h"
 #include "../lv_misc/lv_gc.h"
 #include "../lv_misc/lv_math.h"
-#include "../lv_misc/lv_gc.h"
-#include "../lv_misc/lv_math.h"
 #include "../lv_misc/lv_log.h"
 #include "../lv_hal/lv_hal.h"
 #include <stdint.h>
@@ -107,7 +105,7 @@ typedef struct {
     lv_color_t scale_grad_color;
     lv_color_t scale_end_color;
     lv_opa_t opa_scale;
-    uint32_t clip_corder : 1;
+    uint32_t clip_corner : 1;
     uint32_t border_post : 1;
 } style_snapshot_t;
 
@@ -223,8 +221,9 @@ void lv_init(void)
     _lv_indev_init();
 
     _lv_img_decoder_init();
+#if LV_IMG_CACHE_DEF_SIZE
     lv_img_cache_set_size(LV_IMG_CACHE_DEF_SIZE);
-
+#endif
     /*Test if the IDE has UTF-8 encoding*/
     char * txt = "Á";
 
@@ -592,7 +591,7 @@ bool lv_obj_area_is_visible(const lv_obj_t * obj, lv_area_t * area)
 {
     if(lv_obj_get_hidden(obj)) return false;
 
-    /*Invalidate the object only if it belongs to the curent or previous'*/
+    /*Invalidate the object only if it belongs to the current or previous'*/
     lv_obj_t * obj_scr = lv_obj_get_screen(obj);
     lv_disp_t * disp   = lv_obj_get_disp(obj_scr);
     if(obj_scr == lv_disp_get_scr_act(disp) ||
@@ -1478,7 +1477,7 @@ void lv_obj_report_style_mod(lv_style_t * style)
 }
 
 /**
- * Enable/disable the use of style cahche for an object
+ * Enable/disable the use of style cache for an object
  * @param obj pointer to an object
  * @param dis true: disable; false: enable (re-enable)
  */
@@ -1658,7 +1657,8 @@ void lv_obj_set_parent_event(lv_obj_t * obj, bool en)
 }
 
 /**
- * Set the base direction of the object
+ * Set the base direction of the object.
+ * @note This only works if LV_USE_BIDI is enabled.
  * @param obj pointer to an object
  * @param dir the new base direction. `LV_BIDI_DIR_LTR/RTL/AUTO/INHERIT`
  */
@@ -4311,7 +4311,7 @@ static lv_style_trans_t * trans_create(lv_obj_t * obj, lv_style_property_t prop,
     lv_style_list_t * style_list = lv_obj_get_style_list(obj, part);
     lv_style_t * style_trans = _lv_style_list_get_transition_style(style_list);
 
-    bool cahche_ori = style_list->ignore_cache;
+    bool cache_ori = style_list->ignore_cache;
 
     /*Get the previous and current values*/
     if((prop & 0xF) < LV_STYLE_ID_COLOR) { /*Int*/
@@ -4322,7 +4322,7 @@ static lv_style_trans_t * trans_create(lv_obj_t * obj, lv_style_property_t prop,
         obj->state = new_state;
         lv_style_int_t int2 =  _lv_obj_get_style_int(obj, part, prop);
         style_list->skip_trans = 0;
-        style_list->ignore_cache = cahche_ori;
+        style_list->ignore_cache = cache_ori;
 
         if(int1 == int2)  return NULL;
         obj->state = prev_state;
@@ -4353,7 +4353,7 @@ static lv_style_trans_t * trans_create(lv_obj_t * obj, lv_style_property_t prop,
         obj->state = new_state;
         lv_color_t c2 =  _lv_obj_get_style_color(obj, part, prop);
         style_list->skip_trans = 0;
-        style_list->ignore_cache = cahche_ori;
+        style_list->ignore_cache = cache_ori;
 
         if(c1.full == c2.full) return NULL;
         obj->state = prev_state;
@@ -4375,7 +4375,7 @@ static lv_style_trans_t * trans_create(lv_obj_t * obj, lv_style_property_t prop,
         obj->state = new_state;
         lv_opa_t o2 =  _lv_obj_get_style_opa(obj, part, prop);
         style_list->skip_trans = 0;
-        style_list->ignore_cache = cahche_ori;
+        style_list->ignore_cache = cache_ori;
 
         if(o1 == o2) return NULL;
 
@@ -4398,7 +4398,7 @@ static lv_style_trans_t * trans_create(lv_obj_t * obj, lv_style_property_t prop,
         obj->state = new_state;
         const void * p2 = _lv_obj_get_style_ptr(obj, part, prop);
         style_list->skip_trans = 0;
-        style_list->ignore_cache = cahche_ori;
+        style_list->ignore_cache = cache_ori;
 
         if(memcmp(&p1, &p2, sizeof(const void *)) == 0)  return NULL;
         obj->state = prev_state;
@@ -4761,24 +4761,18 @@ static void invalidate_style_cache(lv_obj_t * obj, uint8_t part, lv_style_proper
 {
     if(style_prop_is_cacheble(prop) == false) return;
 
-    if(part != LV_OBJ_PART_ALL) {
+    for(part = 0; part < _LV_OBJ_PART_REAL_FIRST; part++) {
         lv_style_list_t * list = lv_obj_get_style_list(obj, part);
-        if(list == NULL) return;
+        if(list == NULL) break;
         list->valid_cache = 0;
     }
-    else {
 
-        for(part = 0; part < _LV_OBJ_PART_REAL_FIRST; part++) {
-            lv_style_list_t * list = lv_obj_get_style_list(obj, part);
-            if(list == NULL) break;
-            list->valid_cache = 0;
-        }
-        for(part = _LV_OBJ_PART_REAL_FIRST; part < 0xFF; part++) {
-            lv_style_list_t * list = lv_obj_get_style_list(obj, part);
-            if(list == NULL) break;
-            list->valid_cache = 0;
-        }
+    for(part = _LV_OBJ_PART_REAL_FIRST; part < 0xFF; part++) {
+        lv_style_list_t * list = lv_obj_get_style_list(obj, part);
+        if(list == NULL) break;
+        list->valid_cache = 0;
     }
+
 
     lv_obj_t * child = lv_obj_get_child(obj, NULL);
     while(child) {
@@ -4827,7 +4821,7 @@ static void style_snapshot(lv_obj_t * obj, uint8_t part, style_snapshot_t * shot
     shot->scale_grad_color = lv_obj_get_style_scale_grad_color(obj, part);
     shot->scale_end_color = lv_obj_get_style_scale_end_color(obj, part);
     shot->opa_scale = lv_obj_get_style_opa_scale(obj, part);
-    shot->clip_corder = lv_obj_get_style_clip_corner(obj, part);
+    shot->clip_corner = lv_obj_get_style_clip_corner(obj, part);
     shot->border_post  = lv_obj_get_style_border_post(obj, part);
 
     _lv_obj_disable_style_caching(obj, false);

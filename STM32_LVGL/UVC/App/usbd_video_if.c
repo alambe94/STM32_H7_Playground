@@ -98,7 +98,7 @@
   */
 
 /* USER CODE BEGIN PRIVATE_VARIABLES */
-   uint8_t IMG_Sample[UVC_MAX_FRAME_SIZE];
+   uint8_t *IMG_Sample;
 /* USER CODE END PRIVATE_VARIABLES */
 
 /**
@@ -160,11 +160,8 @@ static int8_t VIDEO_Itf_Init(void)
   /*
      Add your initialization code here
   */
-	uint16_t *ptr = (uint16_t*)IMG_Sample;
-	for(uint32_t i=0; i<UVC_MAX_FRAME_SIZE/2; i++)
-	{
-		ptr[i] = i;
-	}
+  extern void *USB_UVC_Get_Frame_Buffer(void);
+  IMG_Sample = USB_UVC_Get_Frame_Buffer();
   return USBD_OK;
 }
 
@@ -208,7 +205,7 @@ static int8_t VIDEO_Itf_Control(uint8_t cmd, uint8_t *pbuf, uint16_t length)
 static int8_t VIDEO_Itf_Data(uint8_t **pbuf, uint16_t *psize, uint16_t *new_frame)
 {
   static uint32_t picture_index=0;
-  uint16_t PcktSze = MIN(UVC_MAX_FRAME_SIZE - picture_index, UVC_PACKET_SIZE - 2);
+  uint32_t PcktSze = MIN(UVC_MAX_FRAME_SIZE - picture_index, UVC_PACKET_SIZE - 2);
 
   *pbuf = (uint8_t *)(IMG_Sample+picture_index);
   *psize = PcktSze;

@@ -12,9 +12,13 @@
 #include <stdlib.h>
 
 #include "tft.h"
+#include "stm32h7xx.h"
+#include "stm32h7b3i_discovery.h"
+#include "stm32h7b3i_discovery_ts.h"
+#include "stm32h7b3i_discovery_lcd.h"
+#include "stm32h7b3i_discovery_sdram.h"
+#include "../Components/rk043fn48h/rk043fn48h.h"
 
-#include "dma.h"
-#include "ltdc.h"
 /*********************
  *      DEFINES
  *********************/
@@ -52,6 +56,7 @@ static void DMA_TransferError(DMA_HandleTypeDef *han);
 #if LV_USE_GPU
 static void DMA2D_Config(void);
 #endif
+DMA_HandleTypeDef hdma_memtomem_dma1_stream0;
 
 /**********************
  *  STATIC VARIABLES
@@ -68,7 +73,7 @@ typedef uint32_t uintpixel_t;
 
 /* You can try to change buffer to internal ram by uncommenting line below and commenting
  * SDRAM one. */
-static uintpixel_t my_fb[TFT_HOR_RES * TFT_VER_RES];
+__attribute__((section(".SD_RAM"))) static uintpixel_t my_fb[TFT_HOR_RES * TFT_VER_RES];
 
 static int32_t            x1_flush;
 static int32_t            y1_flush;
@@ -192,9 +197,12 @@ static void ex_disp_flush(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t 
   */
 static uint8_t LCD_Init(void)
 {
-	HAL_LTDC_SetAddress(&hltdc, (uint32_t)my_fb, 0);
+    /* Select the used LCD */
 
-    for(uint32_t i = 0; i < (TFT_HOR_RES * TFT_VER_RES) ; i++)
+	BSP_LCD_InitEx(0, LCD_ORIENTATION_LANDSCAPE, LCD_PIXEL_FORMAT_RGB565, LV_HOR_RES_MAX, LV_VER_RES_MAX);
+
+    uint32_t i;
+    for(i = 0; i < (TFT_HOR_RES * TFT_VER_RES) ; i++)
     {
         my_fb[i] = 0;
     }
@@ -204,8 +212,32 @@ static uint8_t LCD_Init(void)
 
 static void DMA_Config(void)
 {
-	// configured in cube
+	/* DMA controller clock enable */
+	__HAL_RCC_DMA1_CLK_ENABLE();
 
+	/* Configure DMA request hdma_memtomem_dma1_stream0 on DMA1_Stream0 */
+	hdma_memtomem_dma1_stream0.Instance = DMA1_Stream0;
+	hdma_memtomem_dma1_stream0.Init.Request = DMA_REQUEST_MEM2MEM;
+	hdma_memtomem_dma1_stream0.Init.Direction = DMA_MEMORY_TO_MEMORY;
+	hdma_memtomem_dma1_stream0.Init.PeriphInc = DMA_PINC_ENABLE;
+	hdma_memtomem_dma1_stream0.Init.MemInc = DMA_MINC_ENABLE;
+	hdma_memtomem_dma1_stream0.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
+	hdma_memtomem_dma1_stream0.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
+	hdma_memtomem_dma1_stream0.Init.Mode = DMA_NORMAL;
+	hdma_memtomem_dma1_stream0.Init.Priority = DMA_PRIORITY_HIGH;
+	hdma_memtomem_dma1_stream0.Init.FIFOMode = DMA_FIFOMODE_ENABLE;
+	hdma_memtomem_dma1_stream0.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_1QUARTERFULL;
+	hdma_memtomem_dma1_stream0.Init.MemBurst = DMA_MBURST_SINGLE;
+	hdma_memtomem_dma1_stream0.Init.PeriphBurst = DMA_PBURST_SINGLE;
+	if (HAL_DMA_Init(&hdma_memtomem_dma1_stream0) != HAL_OK)
+	{
+	Error_Handler();
+	}
+
+	/* DMA interrupt init */
+	/* DMA1_Stream0_IRQn interrupt configuration */
+	HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 0, 0);
+	HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
     /*##-5- Select Callbacks functions called after Transfer complete and Transfer error */
     HAL_DMA_RegisterCallback(&hdma_memtomem_dma1_stream0, HAL_DMA_XFER_CPLT_CB_ID, DMA_TransferComplete);
     HAL_DMA_RegisterCallback(&hdma_memtomem_dma1_stream0, HAL_DMA_XFER_ERROR_CB_ID, DMA_TransferError);
@@ -297,3 +329,8 @@ static void DMA2D_Config(void)
 	//TODO
 }
 #endif
+
+void *USB_UVC_Get_Frame_Buffer(void)
+{
+	return my_fb;
+}

@@ -1,6 +1,6 @@
 /**
  * @file lv_conf.h
- * Configuration file for v7.3.1
+ * Configuration file for v7.9.0
  */
 
 /*
@@ -29,7 +29,7 @@
  * - 16: RGB565
  * - 32: ARGB8888
  */
-#define LV_COLOR_DEPTH 16
+#define LV_COLOR_DEPTH     16
 
 /* Swap the 2 bytes of RGB565 color.
  * Useful if the display has a 8 bit interface (e.g. SPI)*/
@@ -80,9 +80,9 @@ typedef int16_t lv_coord_t;
 #define LV_MEM_CUSTOM      0
 #if LV_MEM_CUSTOM == 0
 /* Size of the memory used by `lv_mem_alloc` in bytes (>= 2kB)*/
-#  define LV_MEM_SIZE (256 * 1024)
+#  define LV_MEM_SIZE    (32U * 1024U)
 
-/* Complier prefix for a big array declaration */
+/* Compiler prefix for a big array declaration */
 #  define LV_MEM_ATTR
 
 /* Set an address for the memory pool instead of allocating it as an array.
@@ -127,7 +127,7 @@ typedef int16_t lv_coord_t;
 #define LV_INDEV_DEF_DRAG_THROW           10
 
 /* Long press time in milliseconds.
- * Time to send `LV_EVENT_LONG_PRESSSED`) */
+ * Time to send `LV_EVENT_LONG_PRESSED`) */
 #define LV_INDEV_DEF_LONG_PRESS_TIME      400
 
 /* Repeated trigger period in long press [ms]
@@ -195,18 +195,31 @@ typedef void * lv_group_user_data_t;
 e.g. "stm32f769xx.h" or "stm32f429xx.h" */
 #define LV_GPU_DMA2D_CMSIS_INCLUDE "stm32h7b3xxq.h"
 
+/*1: Use PXP for CPU off-load on NXP RTxxx platforms */
+#define LV_USE_GPU_NXP_PXP      0
+
+/*1: Add default bare metal and FreeRTOS interrupt handling routines for PXP (lv_gpu_nxp_pxp_osa.c)
+ *   and call lv_gpu_nxp_pxp_init() automatically during lv_init(). Note that symbol FSL_RTOS_FREE_RTOS
+ *   has to be defined in order to use FreeRTOS OSA, otherwise bare-metal implementation is selected.
+ *0: lv_gpu_nxp_pxp_init() has to be called manually before lv_init()
+ * */
+#define LV_USE_GPU_NXP_PXP_AUTO_INIT 0
+
+/*1: Use VG-Lite for CPU offload on NXP RTxxx platforms */
+#define LV_USE_GPU_NXP_VG_LITE   0
+
 /* 1: Enable file system (might be required for images */
-#define LV_USE_FILESYSTEM       0
+#define LV_USE_FILESYSTEM       1
 #if LV_USE_FILESYSTEM
 /*Declare the type of the user data of file system drivers (can be e.g. `void *`, `int`, `struct`)*/
 typedef void * lv_fs_drv_user_data_t;
 #endif
 
 /*1: Add a `user_data` to drivers and objects*/
-#define LV_USE_USER_DATA 1
+#define LV_USE_USER_DATA        0
 
 /*1: Show CPU usage and FPS count in the right bottom corner*/
-#define LV_USE_PERF_MONITOR     1
+#define LV_USE_PERF_MONITOR     0
 
 /*1: Use the functions and types from the older API if possible */
 #define LV_USE_API_EXTENSION_V6  1
@@ -227,7 +240,7 @@ typedef void * lv_fs_drv_user_data_t;
  * (I.e. no new image decoder is added)
  * With complex image decoders (e.g. PNG or JPG) caching can save the continuous open/decode of images.
  * However the opened images might consume additional RAM.
- * LV_IMG_CACHE_DEF_SIZE must be >= 1 */
+ * Set it to 0 to disable caching */
 #define LV_IMG_CACHE_DEF_SIZE       1
 
 /*Declare the type of the user data of image decoder (can be e.g. `void *`, `int`, `struct`)*/
@@ -249,9 +262,14 @@ typedef void * lv_img_decoder_user_data_t;
 /* Define a custom attribute to `lv_disp_flush_ready` function */
 #define LV_ATTRIBUTE_FLUSH_READY
 
+/* Required alignment size for buffers */
+#define LV_ATTRIBUTE_MEM_ALIGN_SIZE
+
 /* With size optimization (-Os) the compiler might not align data to
- * 4 or 8 byte boundary. This alignment will be explicitly applied where needed.
- * E.g. __attribute__((aligned(4))) */
+ * 4 or 8 byte boundary. Some HW may need even 32 or 64 bytes.
+ * This alignment will be explicitly applied where needed.
+ * LV_ATTRIBUTE_MEM_ALIGN_SIZE should be used to specify required align size.
+ * E.g. __attribute__((aligned(LV_ATTRIBUTE_MEM_ALIGN_SIZE))) */
 #define LV_ATTRIBUTE_MEM_ALIGN
 
 /* Attribute to mark large constant arrays for example
@@ -294,7 +312,7 @@ typedef void * lv_indev_drv_user_data_t;            /*Type of user data in the i
  *===============*/
 
 /*1: Enable the log module*/
-#define LV_USE_LOG 1
+#define LV_USE_LOG      0
 #if LV_USE_LOG
 /* How important log should be added:
  * LV_LOG_LEVEL_TRACE       A lot of logs to give detailed information
@@ -307,7 +325,7 @@ typedef void * lv_indev_drv_user_data_t;            /*Type of user data in the i
 
 /* 1: Print the log with 'printf';
  * 0: user need to register a callback with `lv_log_register_print_cb`*/
-#  define LV_LOG_PRINTF 1
+#  define LV_LOG_PRINTF   0
 #endif  /*LV_USE_LOG*/
 
 /*=================
@@ -323,7 +341,7 @@ typedef void * lv_indev_drv_user_data_t;            /*Type of user data in the i
  * The behavior of asserts can be overwritten by redefining them here.
  * E.g. #define LV_ASSERT_MEM(p)  <my_assert_code>
  */
-#define LV_USE_DEBUG        0
+#define LV_USE_DEBUG        1
 #if LV_USE_DEBUG
 
 /*Check if the parameter is NULL. (Quite fast) */
@@ -333,19 +351,19 @@ typedef void * lv_indev_drv_user_data_t;            /*Type of user data in the i
 #define LV_USE_ASSERT_MEM       1
 
 /*Check the integrity of `lv_mem` after critical operations. (Slow)*/
-#define LV_USE_ASSERT_MEM_INTEGRITY 1
+#define LV_USE_ASSERT_MEM_INTEGRITY       0
 
 /* Check the strings.
  * Search for NULL, very long strings, invalid characters, and unnatural repetitions. (Slow)
  * If disabled `LV_USE_ASSERT_NULL` will be performed instead (if it's enabled) */
-#define LV_USE_ASSERT_STR 1
+#define LV_USE_ASSERT_STR       0
 
 /* Check NULL, the object's type and existence (e.g. not deleted). (Quite slow)
  * If disabled `LV_USE_ASSERT_NULL` will be performed instead (if it's enabled) */
-#define LV_USE_ASSERT_OBJ 1
+#define LV_USE_ASSERT_OBJ       0
 
 /*Check if the styles are properly initialized. (Fast)*/
-#define LV_USE_ASSERT_STYLE 1
+#define LV_USE_ASSERT_STYLE     0
 
 #endif /*LV_USE_DEBUG*/
 
@@ -361,35 +379,38 @@ typedef void * lv_indev_drv_user_data_t;            /*Type of user data in the i
 
 /* Montserrat fonts with bpp = 4
  * https://fonts.google.com/specimen/Montserrat  */
-#define LV_FONT_MONTSERRAT_8  0
-#define LV_FONT_MONTSERRAT_10 1
-#define LV_FONT_MONTSERRAT_12 1
-#define LV_FONT_MONTSERRAT_14 1
-#define LV_FONT_MONTSERRAT_16 0
-#define LV_FONT_MONTSERRAT_18 0
-#define LV_FONT_MONTSERRAT_20 0
-#define LV_FONT_MONTSERRAT_22 0
-#define LV_FONT_MONTSERRAT_24 0
-#define LV_FONT_MONTSERRAT_26 0
-#define LV_FONT_MONTSERRAT_28 0
-#define LV_FONT_MONTSERRAT_30 0
-#define LV_FONT_MONTSERRAT_32 0
-#define LV_FONT_MONTSERRAT_34 0
-#define LV_FONT_MONTSERRAT_36 0
-#define LV_FONT_MONTSERRAT_38 0
-#define LV_FONT_MONTSERRAT_40 0
-#define LV_FONT_MONTSERRAT_42 0
-#define LV_FONT_MONTSERRAT_44 0
-#define LV_FONT_MONTSERRAT_46 0
-#define LV_FONT_MONTSERRAT_48 0
+#define LV_FONT_MONTSERRAT_8     0
+#define LV_FONT_MONTSERRAT_10    1
+#define LV_FONT_MONTSERRAT_12    1
+#define LV_FONT_MONTSERRAT_14    1
+#define LV_FONT_MONTSERRAT_16    0
+#define LV_FONT_MONTSERRAT_18    0
+#define LV_FONT_MONTSERRAT_20    0
+#define LV_FONT_MONTSERRAT_22    0
+#define LV_FONT_MONTSERRAT_24    0
+#define LV_FONT_MONTSERRAT_26    0
+#define LV_FONT_MONTSERRAT_28    0
+#define LV_FONT_MONTSERRAT_30    0
+#define LV_FONT_MONTSERRAT_32    0
+#define LV_FONT_MONTSERRAT_34    0
+#define LV_FONT_MONTSERRAT_36    0
+#define LV_FONT_MONTSERRAT_38    0
+#define LV_FONT_MONTSERRAT_40    0
+#define LV_FONT_MONTSERRAT_42    0
+#define LV_FONT_MONTSERRAT_44    0
+#define LV_FONT_MONTSERRAT_46    0
+#define LV_FONT_MONTSERRAT_48    0
 
 /* Demonstrate special features */
-#define LV_FONT_DEJAVU_16_PERSIAN_HEBREW 0
-#define LV_FONT_SIMSUN_16_CJK 0
+#define LV_FONT_MONTSERRAT_12_SUBPX      0
+#define LV_FONT_MONTSERRAT_28_COMPRESSED 0  /*bpp = 3*/
+#define LV_FONT_DEJAVU_16_PERSIAN_HEBREW 0  /*Hebrew, Arabic, PErisan letters and all their forms*/
+#define LV_FONT_SIMSUN_16_CJK            0  /*1000 most common CJK radicals*/
 
 /*Pixel perfect monospace font
  * http://pelulamu.net/unscii/ */
-#define LV_FONT_UNSCII_8 0
+#define LV_FONT_UNSCII_8     0
+#define LV_FONT_UNSCII_16     0
 
 /* Optionally declare your custom fonts here.
  * You can use these fonts as default font too
@@ -402,7 +423,7 @@ typedef void * lv_indev_drv_user_data_t;            /*Type of user data in the i
 /* Enable it if you have fonts with a lot of characters.
  * The limit depends on the font size, font face and bpp
  * but with > 10,000 characters if you see issues probably you need to enable it.*/
-#define LV_FONT_FMT_TXT_LARGE   1
+#define LV_FONT_FMT_TXT_LARGE   0
 
 /* Enables/disables support for compressed fonts. If it's disabled, compressed
  * glyphs cannot be processed by the library and won't be rendered.
@@ -430,11 +451,11 @@ typedef void * lv_font_user_data_t;
 
 /* No theme, you can apply your styles as you need
  * No flags. Set LV_THEME_DEFAULT_FLAG 0 */
- #define LV_USE_THEME_EMPTY       1
+#define LV_USE_THEME_EMPTY       1
 
 /*Simple to the create your theme based on it
  * No flags. Set LV_THEME_DEFAULT_FLAG 0 */
- #define LV_USE_THEME_TEMPLATE    1
+#define LV_USE_THEME_TEMPLATE    1
 
 /* A fast and impressive theme.
  * Flags:
@@ -443,14 +464,14 @@ typedef void * lv_font_user_data_t;
  * LV_THEME_MATERIAL_FLAG_NO_TRANSITION: disable transitions (state change animations)
  * LV_THEME_MATERIAL_FLAG_NO_FOCUS: disable indication of focused state)
  * */
- #define LV_USE_THEME_MATERIAL    1
+#define LV_USE_THEME_MATERIAL    1
 
 /* Mono-color theme for monochrome displays.
  * If LV_THEME_DEFAULT_COLOR_PRIMARY is LV_COLOR_BLACK the
  * texts and borders will be black and the background will be
  * white. Else the colors are inverted.
  * No flags. Set LV_THEME_DEFAULT_FLAG 0 */
- #define LV_USE_THEME_MONO        1
+#define LV_USE_THEME_MONO        1
 
 #define LV_THEME_DEFAULT_INCLUDE            <stdint.h>      /*Include a header for the init. function*/
 #define LV_THEME_DEFAULT_INIT               lv_theme_material_init
@@ -493,9 +514,9 @@ typedef void * lv_font_user_data_t;
 
 /* Support bidirectional texts.
  * Allows mixing Left-to-Right and Right-to-Left texts.
- * The direction will be processed according to the Unicode Bidirectioanl Algorithm:
+ * The direction will be processed according to the Unicode Bidirectional Algorithm:
  * https://www.w3.org/International/articles/inline-bidi-markup/uba-basics*/
-#define LV_USE_BIDI     1
+#define LV_USE_BIDI     0
 #if LV_USE_BIDI
 /* Set the default direction. Supported values:
  * `LV_BIDI_DIR_LTR` Left-to-Right
@@ -507,7 +528,7 @@ typedef void * lv_font_user_data_t;
 /* Enable Arabic/Persian processing
  * In these languages characters should be replaced with
  * an other form based on their position in the text */
-#define LV_USE_ARABIC_PERSIAN_CHARS 1
+#define LV_USE_ARABIC_PERSIAN_CHARS 0
 
 /*Change the built in (v)snprintf functions*/
 #define LV_SPRINTF_CUSTOM   0
@@ -516,7 +537,7 @@ typedef void * lv_font_user_data_t;
 #  define lv_snprintf     snprintf
 #  define lv_vsnprintf    vsnprintf
 #else   /*!LV_SPRINTF_CUSTOM*/
-#  define LV_SPRINTF_DISABLE_FLOAT 0
+#  define LV_SPRINTF_DISABLE_FLOAT 1
 #endif  /*LV_SPRINTF_CUSTOM*/
 
 /*===================
@@ -527,7 +548,7 @@ typedef void * lv_font_user_data_t;
 /*Declare the type of the user data of object (can be e.g. `void *`, `int`, `struct`)*/
 typedef void * lv_obj_user_data_t;
 /*Provide a function to free user data*/
-#define LV_USE_USER_DATA 1
+#define LV_USE_USER_DATA_FREE 0
 #if LV_USE_USER_DATA_FREE
 #  define LV_USER_DATA_FREE_INCLUDE  "something.h"  /*Header for user data free function*/
 /* Function prototype : void user_data_free(lv_obj_t * obj); */
@@ -543,7 +564,7 @@ typedef void * lv_obj_user_data_t;
  * LV_EXT_CLICK_AREA_TINY: The extra area can be adjusted horizontally and vertically (0..255 px)
  * LV_EXT_CLICK_AREA_FULL: The extra area can be adjusted in all 4 directions (-32k..+32k px)
  */
-#define LV_USE_EXT_CLICK_AREA LV_EXT_CLICK_AREA_FULL
+#define LV_USE_EXT_CLICK_AREA  LV_EXT_CLICK_AREA_TINY
 
 /*==================
  *  LV OBJ X USAGE
@@ -621,7 +642,7 @@ typedef void * lv_obj_user_data_t;
 #  define LV_LABEL_WAIT_CHAR_COUNT        3
 
 /*Enable selecting text of the label */
-#  define LV_LABEL_TEXT_SEL               1
+#  define LV_LABEL_TEXT_SEL               0
 
 /*Store extra some info in labels (12 bytes) to speed up drawing of very long texts*/
 #  define LV_LABEL_LONG_TXT_HINT          0
@@ -653,7 +674,7 @@ typedef void * lv_obj_user_data_t;
  * 1: Some extra precision
  * 2: Best precision
  */
-#  define LV_LINEMETER_PRECISE    0
+#  define LV_LINEMETER_PRECISE    1
 #endif
 
 /*Mask (dependencies: -)*/
@@ -707,7 +728,9 @@ typedef void * lv_obj_user_data_t;
 #define LV_USE_TABLE    1
 #if LV_USE_TABLE
 #  define LV_TABLE_COL_MAX    12
+#  define LV_TABLE_CELL_STYLE_CNT 4
 #endif
+
 
 /*Tab (dependencies: lv_page, lv_btnm)*/
 #define LV_USE_TABVIEW      1
@@ -725,15 +748,6 @@ typedef void * lv_obj_user_data_t;
 
 /*Window (dependencies: lv_cont, lv_btn, lv_label, lv_img, lv_page)*/
 #define LV_USE_WIN      1
-
-
-/*File system interface*/
-#define LV_USE_FS_IF    1
-#if LV_USE_FS_IF
-#  define LV_FS_IF_FATFS    '\0'
-#  define LV_FS_IF_PC       'P'
-#endif  /*LV_USE_FS_IF*/
-
 
 /*==================
  * Non-user section

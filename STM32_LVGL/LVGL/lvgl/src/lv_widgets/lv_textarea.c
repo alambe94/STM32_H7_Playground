@@ -110,7 +110,7 @@ lv_obj_t * lv_textarea_create(lv_obj_t * par, const lv_obj_t * copy)
     ext->pwd_mode          = 0;
     ext->pwd_tmp           = NULL;
     ext->pwd_show_time     = LV_TEXTAREA_DEF_PWD_SHOW_TIME;
-    ext->accapted_chars    = NULL;
+    ext->accepted_chars    = NULL;
     ext->max_length        = 0;
     ext->cursor.state      = 1;
     ext->cursor.hidden     = 0;
@@ -161,7 +161,7 @@ lv_obj_t * lv_textarea_create(lv_obj_t * par, const lv_obj_t * copy)
         lv_textarea_ext_t * copy_ext = lv_obj_get_ext_attr(copy);
         ext->label             = lv_label_create(ta, copy_ext->label);
         ext->pwd_mode          = copy_ext->pwd_mode;
-        ext->accapted_chars    = copy_ext->accapted_chars;
+        ext->accepted_chars    = copy_ext->accepted_chars;
         ext->max_length        = copy_ext->max_length;
         ext->cursor.pos        = copy_ext->cursor.pos;
         ext->cursor.valid_x    = copy_ext->cursor.valid_x;
@@ -276,8 +276,7 @@ void lv_textarea_add_char(lv_obj_t * ta, uint32_t c)
     lv_textarea_clear_selection(ta);                                                /*Clear selection*/
 
     if(ext->pwd_mode != 0) {
-
-        ext->pwd_tmp = lv_mem_realloc(ext->pwd_tmp, strlen(ext->pwd_tmp) + 2); /*+2: the new char + \0 */
+        ext->pwd_tmp = lv_mem_realloc(ext->pwd_tmp, strlen(ext->pwd_tmp) + strlen(letter_buf) + 1); /*+2: the new char + \0 */
         LV_ASSERT_MEM(ext->pwd_tmp);
         if(ext->pwd_tmp == NULL) return;
 
@@ -715,8 +714,9 @@ void lv_textarea_set_pwd_mode(lv_obj_t * ta, bool en)
     lv_textarea_ext_t * ext = lv_obj_get_ext_attr(ta);
     if(ext->pwd_mode == en) return;
 
+    ext->pwd_mode = en == false ? 0 : 1;
     /*Pwd mode is now enabled*/
-    if(ext->pwd_mode == 0 && en != false) {
+    if(en != false) {
         char * txt   = lv_label_get_text(ext->label);
         size_t len = strlen(txt);
         ext->pwd_tmp = lv_mem_alloc(len + 1);
@@ -730,14 +730,12 @@ void lv_textarea_set_pwd_mode(lv_obj_t * ta, bool en)
         lv_textarea_clear_selection(ta);
     }
     /*Pwd mode is now disabled*/
-    else if(ext->pwd_mode == 1 && en == false) {
+    else {
         lv_textarea_clear_selection(ta);
         lv_label_set_text(ext->label, ext->pwd_tmp);
         lv_mem_free(ext->pwd_tmp);
         ext->pwd_tmp = NULL;
     }
-
-    ext->pwd_mode = en == false ? 0 : 1;
 
     refr_cursor_area(ta);
 }
@@ -829,7 +827,7 @@ void lv_textarea_set_accepted_chars(lv_obj_t * ta, const char * list)
 
     lv_textarea_ext_t * ext = lv_obj_get_ext_attr(ta);
 
-    ext->accapted_chars = list;
+    ext->accepted_chars = list;
 }
 
 /**
@@ -1071,7 +1069,7 @@ const char * lv_textarea_get_accepted_chars(lv_obj_t * ta)
 
     lv_textarea_ext_t * ext = lv_obj_get_ext_attr(ta);
 
-    return ext->accapted_chars;
+    return ext->accepted_chars;
 }
 
 /**
@@ -1672,6 +1670,7 @@ static void pwd_char_hider(lv_obj_t * ta)
 
         lv_label_set_text(ext->label, txt_tmp);
         _lv_mem_buf_release(txt_tmp);
+        refr_cursor_area(ta);
     }
 }
 
@@ -1686,7 +1685,7 @@ static bool char_is_accepted(lv_obj_t * ta, uint32_t c)
     lv_textarea_ext_t * ext = lv_obj_get_ext_attr(ta);
 
     /*If no restriction accept it*/
-    if(ext->accapted_chars == NULL && ext->max_length == 0) return true;
+    if(ext->accepted_chars == NULL && ext->max_length == 0) return true;
 
     /*Too many characters?*/
     if(ext->max_length > 0 && _lv_txt_get_encoded_length(lv_textarea_get_text(ta)) >= ext->max_length) {
@@ -1694,11 +1693,11 @@ static bool char_is_accepted(lv_obj_t * ta, uint32_t c)
     }
 
     /*Accepted character?*/
-    if(ext->accapted_chars) {
+    if(ext->accepted_chars) {
         uint32_t i = 0;
 
-        while(ext->accapted_chars[i] != '\0') {
-            uint32_t a = _lv_txt_encoded_next(ext->accapted_chars, &i);
+        while(ext->accepted_chars[i] != '\0') {
+            uint32_t a = _lv_txt_encoded_next(ext->accepted_chars, &i);
             if(a == c) return true; /*Accepted*/
         }
 
