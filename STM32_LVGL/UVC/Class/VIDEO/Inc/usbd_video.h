@@ -78,7 +78,7 @@ extern "C" {
 #endif /* UVC_PACKET_SIZE */
 
 #ifndef UVC_MAX_FRAME_SIZE
-#define UVC_MAX_FRAME_SIZE                            (UVC_WIDTH * UVC_HEIGHT * 2)
+#define UVC_MAX_FRAME_SIZE                            (UVC_WIDTH * UVC_HEIGHT * 3)
 #endif /* UVC_MAX_FRAME_SIZE */
 
 #ifndef UVC_COLOR_PRIMARIE

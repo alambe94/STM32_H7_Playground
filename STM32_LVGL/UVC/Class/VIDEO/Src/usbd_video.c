@@ -104,6 +104,10 @@ static void *USBD_VIDEO_GetEpDesc(uint8_t *pConfDesc, uint8_t EpAddr);
 static void *USBD_VIDEO_GetVSFrameDesc(uint8_t *pConfDesc);
 
 
+static uint8_t UVC_IMG[UVC_MAX_FRAME_SIZE];
+static uint32_t JPEG_IMG_Size;
+static uint32_t JPEG_Flag;
+
 /**
   * @}
   */
@@ -579,10 +583,6 @@ static uint8_t  USBD_VIDEO_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef 
   return ret;
 }
 
-uint8_t UVC_IMG[UVC_MAX_FRAME_SIZE];
-extern uint32_t JPEG_OutImageSize;
-extern uint32_t jpeg_encode_processing_end;
-
 /**
   * @brief  USBD_VIDEO_DataIn
   *         handle data IN Stage
@@ -603,10 +603,8 @@ static uint8_t  USBD_VIDEO_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
   {
 	  uint16_t PcktSze = 0;
 	  uint16_t SndCnt = 0;
-	  if(jpeg_encode_processing_end)
-	  {
-		  PcktSze = MIN(JPEG_OutImageSize-image_index, UVC_PACKET_SIZE-2);
-	  }
+
+	  PcktSze = MIN(JPEG_IMG_Size-image_index, UVC_PACKET_SIZE-2);
 
 	  if(hVIDEO->sof == 1 || image_index==0)
 	  {
@@ -1013,6 +1011,13 @@ uint8_t USBD_VIDEO_RegisterInterface(USBD_HandleTypeDef   *pdev, USBD_VIDEO_ItfT
 void *UVC_Get_Frame_Buffer(void)
 {
 	return UVC_IMG;
+}
+
+
+void UVC_Set_Event(uint32_t size, uint8_t flag)
+{
+	JPEG_IMG_Size = size;
+	JPEG_Flag = flag;
 }
 
 /**

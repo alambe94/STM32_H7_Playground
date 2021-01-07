@@ -59,9 +59,6 @@
 /* External variables --------------------------------------------------------*/
 extern PCD_HandleTypeDef hpcd_USB_OTG_HS;
 extern DMA_HandleTypeDef hdma_memtomem_dma1_stream0;
-extern MDMA_HandleTypeDef hmdma_jpeg_outfifo_th;
-extern MDMA_HandleTypeDef hmdma_jpeg_infifo_th;
-extern JPEG_HandleTypeDef hjpeg;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -230,35 +227,6 @@ void OTG_HS_IRQHandler(void)
   /* USER CODE BEGIN OTG_HS_IRQn 1 */
 
   /* USER CODE END OTG_HS_IRQn 1 */
-}
-
-/**
-  * @brief This function handles JPEG global interrupt.
-  */
-void JPEG_IRQHandler(void)
-{
-  /* USER CODE BEGIN JPEG_IRQn 0 */
-
-  /* USER CODE END JPEG_IRQn 0 */
-  HAL_JPEG_IRQHandler(&hjpeg);
-  /* USER CODE BEGIN JPEG_IRQn 1 */
-
-  /* USER CODE END JPEG_IRQn 1 */
-}
-
-/**
-  * @brief This function handles MDMA global interrupt.
-  */
-void MDMA_IRQHandler(void)
-{
-  /* USER CODE BEGIN MDMA_IRQn 0 */
-
-  /* USER CODE END MDMA_IRQn 0 */
-  HAL_MDMA_IRQHandler(&hmdma_jpeg_outfifo_th);
-  HAL_MDMA_IRQHandler(&hmdma_jpeg_infifo_th);
-  /* USER CODE BEGIN MDMA_IRQn 1 */
-
-  /* USER CODE END MDMA_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

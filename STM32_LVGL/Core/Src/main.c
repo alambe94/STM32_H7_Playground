@@ -20,8 +20,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "dma.h"
-#include "jpeg.h"
-#include "mdma.h"
+#include "libjpeg.h"
 #include "usb_device.h"
 #include "gpio.h"
 
@@ -31,8 +30,7 @@
 #include "hal_stm_lvgl/tft/tft.h"
 #include "hal_stm_lvgl/touchpad/touchpad.h"
 #include "lv_examples/lv_examples.h"
-#include "jpeg_utils.h"
-#include "encode_dma.h"
+#include "encode_jpeg.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -105,37 +103,33 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
-  MX_MDMA_Init();
   MX_USB_DEVICE_Init();
-  MX_JPEG_Init();
+  MX_LIBJPEG_Init();
   /* USER CODE BEGIN 2 */
-  extern const uint32_t Image_RGB565[];
   extern void *LCD_Get_Frame_Buffer(void);
   extern void *UVC_Get_Frame_Buffer(void);
+  extern void UVC_Set_Event(uint32_t size, uint8_t flag);
+  extern void *UVC_Get_Frame_Buffer(void);
 
-  /*##-1- JPEG Initialization ################################################*/
-  /* Init The JPEG Color Look Up Tables used for YCbCr to RGB conversion   */
-  JPEG_InitColorTables();
+  extern uint32_t Image_RGB888[];
 
-  /*##-6- JPEG Encoding with DMA (Not Blocking ) Method ################*/
-  JPEG_Encode_DMA(&hjpeg, (uint32_t)Image_RGB565, 320*240*2, UVC_Get_Frame_Buffer());
+  uint32_t jpj_sz = 320*240*3;
+  uint8_t *in_jpj = LCD_Get_Frame_Buffer();
+  uint8_t *out_jpj = UVC_Get_Frame_Buffer();
 
-  /*##-7- Wait till end of JPEG encoding and perfom Input/Output Processing in BackGround  #*/
-  do
-  {
-    JPEG_EncodeInputHandler(&hjpeg);
-    jpeg_encode_processing_end = JPEG_EncodeOutputHandler(&hjpeg);
 
-  }while(jpeg_encode_processing_end == 0);
+  encode_jpeg((uint8_t*)Image_RGB888, 320, 240, 75, NULL, &jpj_sz, &out_jpj);
 
-  //lv_init();
+  UVC_Set_Event(jpj_sz, 1);
 
-  //tft_init();
-  //touchpad_init();
+  lv_init();
+
+  tft_init();
+  touchpad_init();
 
   //lv_demo_music();
   //lv_demo_stress();
-  //lv_demo_widgets();
+  lv_demo_widgets();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -147,7 +141,7 @@ int main(void)
     /* USER CODE BEGIN 3 */
     HAL_Delay(5);
 
-    //lv_task_handler();
+    lv_task_handler();
   }
   /* USER CODE END 3 */
 }

@@ -199,7 +199,8 @@ static uint8_t LCD_Init(void)
 {
     /* Select the used LCD */
 
-	BSP_LCD_InitEx(0, LCD_ORIENTATION_LANDSCAPE, LCD_PIXEL_FORMAT_RGB565, LV_HOR_RES_MAX, LV_VER_RES_MAX);
+	BSP_LCD_InitEx(0, LCD_ORIENTATION_LANDSCAPE, LCD_PIXEL_FORMAT_RGB888, LV_HOR_RES_MAX, LV_VER_RES_MAX);
+	BSP_LCD_SetLayerAddress(0,0, (uint32_t)my_fb);
 
     uint32_t i;
     for(i = 0; i < (TFT_HOR_RES * TFT_VER_RES) ; i++)

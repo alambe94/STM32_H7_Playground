@@ -99,9 +99,9 @@ int main(void)
   extern void *UVC_Get_Frame_Buffer(void);
   extern uint32_t JPEG_OutImageSize;
   extern uint32_t Image_RGB888[];
-  uint32_t jpj_sz = 320*270*3;
+  uint32_t jpj_sz = 320*240*3;
   uint8_t *out_jpj = UVC_Get_Frame_Buffer();
-  encode_jpeg((uint8_t*)Image_RGB888, 320, 270, 75, NULL, &jpj_sz, &out_jpj);
+  encode_jpeg((uint8_t*)Image_RGB888, 320, 240, 75, NULL, &jpj_sz, &out_jpj);
   JPEG_OutImageSize = jpj_sz;
   /* USER CODE END 2 */
 
