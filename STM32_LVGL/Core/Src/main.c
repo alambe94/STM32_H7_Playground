@@ -118,7 +118,7 @@ int main(void)
   uint8_t *out_jpj = UVC_Get_Frame_Buffer();
 
 
-  encode_jpeg((uint8_t*)Image_RGB888, 320, 240, 75, NULL, &jpj_sz, &out_jpj);
+  encode_jpeg((uint8_t*)Image_RGB888, 320, 240, 10, NULL, &jpj_sz, &out_jpj);
 
   UVC_Set_Event(jpj_sz, 1);
 

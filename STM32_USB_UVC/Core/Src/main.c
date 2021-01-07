@@ -19,13 +19,16 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "jpeg.h"
 #include "libjpeg.h"
+#include "mdma.h"
 #include "usb_device.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "encode.h"
+#include "encode_dma.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -93,16 +96,32 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_MDMA_Init();
   MX_USB_DEVICE_Init();
   MX_LIBJPEG_Init();
+  MX_JPEG_Init();
   /* USER CODE BEGIN 2 */
   extern void *UVC_Get_Frame_Buffer(void);
   extern uint32_t JPEG_OutImageSize;
   extern uint32_t Image_RGB888[];
   uint32_t jpj_sz = 320*240*3;
   uint8_t *out_jpj = UVC_Get_Frame_Buffer();
+
   encode_jpeg((uint8_t*)Image_RGB888, 320, 240, 75, NULL, &jpj_sz, &out_jpj);
   JPEG_OutImageSize = jpj_sz;
+
+  uint32_t jpeg_encode_processing_end = 0;
+  JPEG_InitColorTables();
+
+  JPEG_Encode_DMA(&hjpeg, (uint32_t)Image_RGB888, 320*240*3, out_jpj, &jpj_sz);
+
+  do
+  {
+	JPEG_EncodeInputHandler(&hjpeg);
+	jpeg_encode_processing_end = JPEG_EncodeOutputHandler(&hjpeg);
+  }while(jpeg_encode_processing_end == 0);
+  JPEG_OutImageSize = jpj_sz;
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
