@@ -580,8 +580,7 @@ static uint8_t  USBD_VIDEO_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef 
 }
 
 uint8_t UVC_IMG[UVC_MAX_FRAME_SIZE];
-extern uint32_t JPEG_OutImageSize;
-extern uint32_t jpeg_encode_processing_end;
+uint32_t JPEG_OutImageSize;
 
 /**
   * @brief  USBD_VIDEO_DataIn
@@ -604,7 +603,7 @@ static uint8_t  USBD_VIDEO_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
 	  uint16_t PcktSze = 0;
 	  uint16_t SndCnt = 0;
 
-	  PcktSze = MIN(UVC_MAX_FRAME_SIZE-image_index, UVC_PACKET_SIZE-2);
+	  PcktSze = MIN(JPEG_OutImageSize-image_index, UVC_PACKET_SIZE-2);
 
 	  if(hVIDEO->sof == 1 || image_index==0)
 	  {

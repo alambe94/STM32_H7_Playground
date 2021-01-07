@@ -78,7 +78,7 @@ extern "C" {
 #endif /* UVC_PACKET_SIZE */
 
 #ifndef UVC_MAX_FRAME_SIZE
-#define UVC_MAX_FRAME_SIZE                            (UVC_WIDTH * UVC_HEIGHT * 2)
+#define UVC_MAX_FRAME_SIZE                            (UVC_WIDTH * UVC_HEIGHT * 3)
 #endif /* UVC_MAX_FRAME_SIZE */
 
 #ifndef UVC_COLOR_PRIMARIE
@@ -94,7 +94,7 @@ extern "C" {
 #endif /* UVC_MATRIX_COEFFICIENTS */
 
 #ifndef UVC_BITS_PER_PIXEL
-#define UVC_BITS_PER_PIXEL                            12U
+#define UVC_BITS_PER_PIXEL                            16U
 #endif /* UVC_BITS_PER_PIXEL */
 
 #define UVC_GUID_YUY2                                 0x32595559U

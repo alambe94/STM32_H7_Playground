@@ -212,32 +212,7 @@ static uint8_t LCD_Init(void)
 
 static void DMA_Config(void)
 {
-	/* DMA controller clock enable */
-	__HAL_RCC_DMA1_CLK_ENABLE();
-
-	/* Configure DMA request hdma_memtomem_dma1_stream0 on DMA1_Stream0 */
-	hdma_memtomem_dma1_stream0.Instance = DMA1_Stream0;
-	hdma_memtomem_dma1_stream0.Init.Request = DMA_REQUEST_MEM2MEM;
-	hdma_memtomem_dma1_stream0.Init.Direction = DMA_MEMORY_TO_MEMORY;
-	hdma_memtomem_dma1_stream0.Init.PeriphInc = DMA_PINC_ENABLE;
-	hdma_memtomem_dma1_stream0.Init.MemInc = DMA_MINC_ENABLE;
-	hdma_memtomem_dma1_stream0.Init.PeriphDataAlignment = DMA_PDATAALIGN_HALFWORD;
-	hdma_memtomem_dma1_stream0.Init.MemDataAlignment = DMA_MDATAALIGN_HALFWORD;
-	hdma_memtomem_dma1_stream0.Init.Mode = DMA_NORMAL;
-	hdma_memtomem_dma1_stream0.Init.Priority = DMA_PRIORITY_HIGH;
-	hdma_memtomem_dma1_stream0.Init.FIFOMode = DMA_FIFOMODE_ENABLE;
-	hdma_memtomem_dma1_stream0.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_1QUARTERFULL;
-	hdma_memtomem_dma1_stream0.Init.MemBurst = DMA_MBURST_SINGLE;
-	hdma_memtomem_dma1_stream0.Init.PeriphBurst = DMA_PBURST_SINGLE;
-	if (HAL_DMA_Init(&hdma_memtomem_dma1_stream0) != HAL_OK)
-	{
-	Error_Handler();
-	}
-
-	/* DMA interrupt init */
-	/* DMA1_Stream0_IRQn interrupt configuration */
-	HAL_NVIC_SetPriority(DMA1_Stream0_IRQn, 0, 0);
-	HAL_NVIC_EnableIRQ(DMA1_Stream0_IRQn);
+    //cube
     /*##-5- Select Callbacks functions called after Transfer complete and Transfer error */
     HAL_DMA_RegisterCallback(&hdma_memtomem_dma1_stream0, HAL_DMA_XFER_CPLT_CB_ID, DMA_TransferComplete);
     HAL_DMA_RegisterCallback(&hdma_memtomem_dma1_stream0, HAL_DMA_XFER_ERROR_CB_ID, DMA_TransferError);

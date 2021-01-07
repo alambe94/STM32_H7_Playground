@@ -62,7 +62,7 @@ extern "C" {
 #endif /* UVC_WIDTH */
 
 #ifndef UVC_HEIGHT
-#define UVC_HEIGHT                                    240U
+#define UVC_HEIGHT                                    270
 #endif /* UVC_HEIGHT */
 
 #ifndef UVC_CAM_FPS_FS
@@ -94,7 +94,7 @@ extern "C" {
 #endif /* UVC_MATRIX_COEFFICIENTS */
 
 #ifndef UVC_BITS_PER_PIXEL
-#define UVC_BITS_PER_PIXEL                            12U
+#define UVC_BITS_PER_PIXEL                            16U
 #endif /* UVC_BITS_PER_PIXEL */
 
 #define UVC_GUID_YUY2                                 0x32595559U

@@ -57,6 +57,7 @@
 									<listOptionValue builtIn="false" value="../LIBJPEG/App"/>
 									<listOptionValue builtIn="false" value="../LIBJPEG/Target"/>
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/LibJPEG/include"/>
+									<listOptionValue builtIn="false" value="../JPEG_Test"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1278205996" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -148,6 +149,7 @@
 									<listOptionValue builtIn="false" value="../LIBJPEG/App"/>
 									<listOptionValue builtIn="false" value="../LIBJPEG/Target"/>
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/LibJPEG/include"/>
+									<listOptionValue builtIn="false" value="../JPEG_Test"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1990953908" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
