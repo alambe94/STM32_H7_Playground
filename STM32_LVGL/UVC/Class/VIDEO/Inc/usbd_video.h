@@ -66,19 +66,19 @@ extern "C" {
 #endif /* UVC_HEIGHT */
 
 #ifndef UVC_CAM_FPS_FS
-#define UVC_CAM_FPS_FS                                30U
+#define UVC_CAM_FPS_FS                                1U
 #endif /* UVC_CAM_FPS_FS */
 
 #ifndef UVC_CAM_FPS_HS
-#define UVC_CAM_FPS_HS                                30U
+#define UVC_CAM_FPS_HS                                10U
 #endif /* UVC_CAM_FPS_HS */
 
 #ifndef UVC_PACKET_SIZE
-#define UVC_PACKET_SIZE                               512U
+#define UVC_PACKET_SIZE                               1024U
 #endif /* UVC_PACKET_SIZE */
 
 #ifndef UVC_MAX_FRAME_SIZE
-#define UVC_MAX_FRAME_SIZE                            (UVC_WIDTH * UVC_HEIGHT * UVC_BITS_PER_PIXEL / 8U)
+#define UVC_MAX_FRAME_SIZE                            (UVC_WIDTH * UVC_HEIGHT * 2)
 #endif /* UVC_MAX_FRAME_SIZE */
 
 #ifndef UVC_COLOR_PRIMARIE
@@ -94,7 +94,7 @@ extern "C" {
 #endif /* UVC_MATRIX_COEFFICIENTS */
 
 #ifndef UVC_BITS_PER_PIXEL
-#define UVC_BITS_PER_PIXEL                            16U
+#define UVC_BITS_PER_PIXEL                            12U
 #endif /* UVC_BITS_PER_PIXEL */
 
 #define UVC_GUID_YUY2                                 0x32595559U
@@ -106,8 +106,8 @@ extern "C" {
 
 #define UVC_INTERVAL(n)                               (10000000U/(n))
 
-#define UVC_MIN_BIT_RATE(n)                           (UVC_WIDTH * UVC_HEIGHT * UVC_BITS_PER_PIXEL * (n)) /* 16 bit */
-#define UVC_MAX_BIT_RATE(n)                           (UVC_WIDTH * UVC_HEIGHT * UVC_BITS_PER_PIXEL * (n)) /* 16 bit */
+#define UVC_MIN_BIT_RATE(n)                           (UVC_WIDTH * UVC_HEIGHT * 16 * (n)) /* 16 bit */
+#define UVC_MAX_BIT_RATE(n)                           (UVC_WIDTH * UVC_HEIGHT * 16 * (n)) /* 16 bit */
 
 #define UVC_PACKETS_IN_FRAME(n)                       (UVC_MAX_FRAME_SIZE / (n))
 
@@ -116,7 +116,7 @@ extern "C" {
 #endif
 
 #ifndef UVC_ISO_HS_MPS
-#define UVC_ISO_HS_MPS                                512U
+#define UVC_ISO_HS_MPS                                1024U
 #endif
 
 #ifndef UVC_HEADER_PACKET_CNT
@@ -404,6 +404,7 @@ typedef struct
 {
   uint32_t                   interface;
   uint32_t                   uvc_state;
+  uint32_t                   sof;
   uint8_t                    buffer[UVC_TOTAL_BUF_SIZE];
   VIDEO_OffsetTypeDef        offset;
   USBD_VIDEO_ControlTypeDef  control;

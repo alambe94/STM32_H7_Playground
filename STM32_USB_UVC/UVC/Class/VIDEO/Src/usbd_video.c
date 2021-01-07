@@ -579,6 +579,10 @@ static uint8_t  USBD_VIDEO_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef 
   return ret;
 }
 
+uint8_t UVC_IMG[UVC_MAX_FRAME_SIZE];
+extern uint32_t JPEG_OutImageSize;
+extern uint32_t jpeg_encode_processing_end;
+
 /**
   * @brief  USBD_VIDEO_DataIn
   *         handle data IN Stage
@@ -591,34 +595,42 @@ static uint8_t  USBD_VIDEO_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
   USBD_VIDEO_HandleTypeDef *hVIDEO = (USBD_VIDEO_HandleTypeDef *) pdev->pClassData;
 
   static uint8_t packet[UVC_PACKET_SIZE];
-  static uint8_t *Pcktdata = packet;
   static uint8_t frame_toggle;
-  uint16_t NewFrame = 0U;
-  uint16_t PcktSze = 0U;
+  static uint32_t image_index;
 
   /* Check if the Streaming has already been started */
   if (hVIDEO->uvc_state == UVC_PLAY_STATUS_STREAMING)
   {
-    /* Get the current packet buffer, index and size from the application layer */
-    ((USBD_VIDEO_ItfTypeDef *)pdev->pUserData)->Data(&Pcktdata, &PcktSze, &NewFrame);
+	  uint16_t PcktSze = 0;
+	  uint16_t SndCnt = 0;
 
-    packet[0] = 0x02;
+	  PcktSze = MIN(UVC_MAX_FRAME_SIZE-image_index, UVC_PACKET_SIZE-2);
 
-	  /* Check if this is the first packet in current image */
-	  if (NewFrame)
+	  if(hVIDEO->sof == 1 || image_index==0)
 	  {
-		/* Set the packet start index */
-		frame_toggle ^= 0x01U;
+		  hVIDEO->sof = 0;
+		  packet[0] = 0x02;
+		  packet[1] = frame_toggle;
+		  (void)USBD_memcpy((packet + 2U), (UVC_IMG+image_index), PcktSze);
+		  SndCnt = PcktSze+2;
+	  }
+	  else
+	  {
+		  (void)USBD_memcpy(packet, (UVC_IMG+image_index), PcktSze);
+		  SndCnt = PcktSze;
 	  }
 
-	  packet[1] = frame_toggle;
+	  image_index += PcktSze;
 
-	  (void)USBD_memcpy((packet + 2U), Pcktdata, PcktSze);
-
+	  if(PcktSze<UVC_PACKET_SIZE-2)
+	  {
+		frame_toggle ^= 0x01U;
+		image_index = 0;
+	  }
 
     /* Transmit the packet on Endpoint */
     (void)USBD_LL_Transmit(pdev, (uint8_t)(epnum | 0x80U),
-                           (uint8_t *)&packet, (uint32_t)PcktSze+2);
+                           (uint8_t *)packet, SndCnt);
   }
 
   /* Exit with no error code */
@@ -644,6 +656,10 @@ static uint8_t  USBD_VIDEO_SOF(USBD_HandleTypeDef *pdev)
 
     /* Enable Streaming state */
     hVIDEO->uvc_state = UVC_PLAY_STATUS_STREAMING;
+  }
+  else
+  {
+	  hVIDEO->sof = 1;
   }
 
   /* Exit with no error code */
@@ -990,6 +1006,11 @@ uint8_t USBD_VIDEO_RegisterInterface(USBD_HandleTypeDef   *pdev, USBD_VIDEO_ItfT
 
   /* Exit with no error code */
   return (uint8_t)USBD_OK;
+}
+
+void *UVC_Get_Frame_Buffer(void)
+{
+	return UVC_IMG;
 }
 
 /**

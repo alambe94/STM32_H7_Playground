@@ -48,8 +48,8 @@ typedef struct
 
 #define JPEG_CHROMA_SAMPLING     JPEG_420_SUBSAMPLING   /* Select Chroma Sampling: JPEG_420_SUBSAMPLING, JPEG_422_SUBSAMPLING, JPEG_444_SUBSAMPLING   */
 #define JPEG_COLOR_SPACE         JPEG_YCBCR_COLORSPACE  /* Select Color Space: JPEG_YCBCR_COLORSPACE, JPEG_GRAYSCALE_COLORSPACE, JPEG_CMYK_COLORSPACE */
-#define JPEG_IMAGE_QUALITY       75                     /* Set Image Quality for Jpeg Encoding */
-#define MAX_INPUT_WIDTH          480                    /* Set the Maximum of BMP images Width to be tested */
+#define JPEG_IMAGE_QUALITY       5                     /* Set Image Quality for Jpeg Encoding */
+#define MAX_INPUT_WIDTH          320                    /* Set the Maximum of BMP images Width to be tested */
 #define MAX_INPUT_LINES          16                     /* Set Input buffer lines to 16 for YCbCr420, and 8 for YCbCr422 and YCbCr444 (to save RAM space) */
 
 #define CHUNK_SIZE_IN   ((uint32_t)(MAX_INPUT_WIDTH * BYTES_PER_PIXEL * MAX_INPUT_LINES)) 
@@ -203,7 +203,6 @@ uint32_t JPEG_EncodeOutputHandler(JPEG_HandleTypeDef *hjpeg)
       HAL_JPEG_Resume(hjpeg, JPEG_PAUSE_RESUME_OUTPUT);            
     }    
   }
-
 
   return 0;  
 }

@@ -118,7 +118,7 @@ int main(void)
   JPEG_InitColorTables();
 
   /*##-6- JPEG Encoding with DMA (Not Blocking ) Method ################*/
-  JPEG_Encode_DMA(&hjpeg, (uint32_t)Image_RGB565, 480*272*2, UVC_Get_Frame_Buffer());
+  JPEG_Encode_DMA(&hjpeg, (uint32_t)Image_RGB565, 320*240*2, UVC_Get_Frame_Buffer());
 
   /*##-7- Wait till end of JPEG encoding and perfom Input/Output Processing in BackGround  #*/
   do
