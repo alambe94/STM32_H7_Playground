@@ -104,24 +104,24 @@ int main(void)
   extern void *UVC_Get_Frame_Buffer(void);
   extern uint32_t JPEG_OutImageSize;
   extern uint32_t Image_RGB888[];
+  extern uint32_t Image_RGB565[];
+
   uint32_t jpj_sz = 320*240*3;
   uint8_t *out_jpj = UVC_Get_Frame_Buffer();
 
-  encode_jpeg((uint8_t*)Image_RGB888, 320, 240, 75, NULL, &jpj_sz, &out_jpj);
+  //encode_jpeg((uint8_t*)Image_RGB888, 320, 240, 75, NULL, &jpj_sz, &out_jpj);
   JPEG_OutImageSize = jpj_sz;
 
-  uint32_t jpeg_encode_processing_end = 0;
   JPEG_InitColorTables();
+  static uint8_t img_tmp[320*240*2];
 
-  JPEG_Encode_DMA(&hjpeg, (uint32_t)Image_RGB888, 320*240*3, out_jpj, &jpj_sz);
-
-  do
-  {
-	JPEG_EncodeInputHandler(&hjpeg);
-	jpeg_encode_processing_end = JPEG_EncodeOutputHandler(&hjpeg);
-  }while(jpeg_encode_processing_end == 0);
-  JPEG_OutImageSize = jpj_sz;
-
+  JPEG_OutImageSize = JPEG_Encode_DMA(&hjpeg,
+		                              (uint8_t*)Image_RGB565,
+				                      320,
+				                      240,
+				                      2,
+				                      img_tmp,
+				                      out_jpj);
   /* USER CODE END 2 */
 
   /* Infinite loop */
