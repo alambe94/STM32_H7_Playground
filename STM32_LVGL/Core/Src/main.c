@@ -22,12 +22,15 @@
 #include "cmsis_os.h"
 #include "dma.h"
 #include "dma2d.h"
+#include "fatfs.h"
 #include "i2c.h"
 #include "jpeg.h"
 #include "libjpeg.h"
 #include "ltdc.h"
 #include "octospi.h"
+#include "rng.h"
 #include "rtc.h"
+#include "sdmmc.h"
 #include "spi.h"
 #include "usart.h"
 #include "usb_otg.h"
@@ -112,12 +115,15 @@ int main(void)
   MX_LTDC_Init();
   MX_OCTOSPI1_Init();
   MX_RTC_Init();
+  MX_SDMMC1_SD_Init();
   MX_SPI2_Init();
   MX_USART1_UART_Init();
   MX_USB_OTG_HS_PCD_Init();
   MX_JPEG_Init();
   MX_DMA2D_Init();
   MX_LIBJPEG_Init();
+  MX_FATFS_Init();
+  MX_RNG_Init();
   /* USER CODE BEGIN 2 */
   extern void LVGL_Thread_Add(void);
   extern void JPEG_Thread_Add(void);
@@ -172,12 +178,13 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSE
-                              |RCC_OSCILLATORTYPE_LSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48|RCC_OSCILLATORTYPE_HSI
+                              |RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_LSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.LSEState = RCC_LSE_ON;
   RCC_OscInitStruct.HSIState = RCC_HSI_DIV1;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
+  RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 12;
@@ -210,10 +217,11 @@ void SystemClock_Config(void)
     Error_Handler();
   }
   PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_RTC|RCC_PERIPHCLK_LTDC
-                              |RCC_PERIPHCLK_USART16|RCC_PERIPHCLK_SPI2
-                              |RCC_PERIPHCLK_SDMMC|RCC_PERIPHCLK_I2C4
-                              |RCC_PERIPHCLK_USB|RCC_PERIPHCLK_OSPI
-                              |RCC_PERIPHCLK_FMC|RCC_PERIPHCLK_CKPER;
+                              |RCC_PERIPHCLK_USART16|RCC_PERIPHCLK_RNG
+                              |RCC_PERIPHCLK_SPI2|RCC_PERIPHCLK_SDMMC
+                              |RCC_PERIPHCLK_I2C4|RCC_PERIPHCLK_USB
+                              |RCC_PERIPHCLK_OSPI|RCC_PERIPHCLK_FMC
+                              |RCC_PERIPHCLK_CKPER;
   PeriphClkInitStruct.PLL2.PLL2M = 12;
   PeriphClkInitStruct.PLL2.PLL2N = 200;
   PeriphClkInitStruct.PLL2.PLL2P = 2;
@@ -236,6 +244,7 @@ void SystemClock_Config(void)
   PeriphClkInitStruct.CkperClockSelection = RCC_CLKPSOURCE_HSI;
   PeriphClkInitStruct.Spi123ClockSelection = RCC_SPI123CLKSOURCE_CLKP;
   PeriphClkInitStruct.Usart16ClockSelection = RCC_USART16910CLKSOURCE_D2PCLK2;
+  PeriphClkInitStruct.RngClockSelection = RCC_RNGCLKSOURCE_HSI48;
   PeriphClkInitStruct.UsbClockSelection = RCC_USBCLKSOURCE_PLL3;
   PeriphClkInitStruct.I2c4ClockSelection = RCC_I2C4CLKSOURCE_D3PCLK1;
   PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSE;
