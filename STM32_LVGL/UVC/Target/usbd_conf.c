@@ -63,7 +63,7 @@ USBD_StatusTypeDef USBD_Get_USB_Status(HAL_StatusTypeDef hal_status);
 *******************************************************************************/
 /* MSP Init */
 
-void HAL_PCD_MspInit(PCD_HandleTypeDef* pcdHandle)
+__weak void HAL_PCD_MspInit(PCD_HandleTypeDef* pcdHandle)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
   if(pcdHandle->Instance==USB_OTG_HS)
@@ -140,7 +140,7 @@ void HAL_PCD_MspInit(PCD_HandleTypeDef* pcdHandle)
   }
 }
 
-void HAL_PCD_MspDeInit(PCD_HandleTypeDef* pcdHandle)
+__weak void HAL_PCD_MspDeInit(PCD_HandleTypeDef* pcdHandle)
 {
   if(pcdHandle->Instance==USB_OTG_HS)
   {
@@ -426,7 +426,7 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
 #endif /* USE_HAL_PCD_REGISTER_CALLBACKS */
   HAL_PCDEx_SetRxFiFo(&hpcd_USB_OTG_HS, 0x200);
   HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_HS, 0, 0x80);
-  HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_HS, 1, 0x200);
+  HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_HS, 1, 0x400);
   }
   return USBD_OK;
 }

@@ -98,8 +98,7 @@
   */
 
 /* USER CODE BEGIN PRIVATE_VARIABLES */
-   uint8_t UVC_IMG[UVC_MAX_FRAME_SIZE];
-   extern uint32_t JPEG_OutImageSize;
+
 /* USER CODE END PRIVATE_VARIABLES */
 
 /**
@@ -161,11 +160,6 @@ static int8_t VIDEO_Itf_Init(void)
   /*
      Add your initialization code here
   */
-	uint16_t *ptr = (uint16_t*)UVC_IMG;
-	for(uint32_t i=0; i<UVC_MAX_FRAME_SIZE/2; i++)
-	{
-		//ptr[i] = i;
-	}
   return USBD_OK;
 }
 
