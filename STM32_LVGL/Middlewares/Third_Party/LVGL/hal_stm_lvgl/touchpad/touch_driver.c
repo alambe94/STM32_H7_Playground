@@ -120,4 +120,3 @@ int32_t FT5336_IO_ReadReg(uint16_t add, uint16_t reg, uint8_t *data, uint16_t le
 	HAL_I2C_Mem_Read(&hi2c4, 0x70U, reg, 1, data, len, 100);
 	return FT5336_OK;
 }
-

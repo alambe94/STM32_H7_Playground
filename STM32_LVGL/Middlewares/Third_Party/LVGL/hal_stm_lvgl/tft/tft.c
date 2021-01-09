@@ -32,6 +32,7 @@
 /**********************
  *      TYPEDEFS
  **********************/
+#define USE_DOUBLE_BUUFER               1
 
 /**********************
  *  STATIC PROTOTYPES
@@ -65,9 +66,17 @@ typedef uint16_t uintpixel_t;
 typedef uint32_t uintpixel_t;
 #endif
 
+static lv_disp_buf_t disp_buf_1;
+
+#if(USE_DOUBLE_BUUFER == 1)
+__attribute__((section(".SD_RAM")))  static lv_color_t buf1_1[LV_HOR_RES_MAX * LV_VER_RES_MAX];
+__attribute__((section(".SD_RAM")))  static lv_color_t buf1_2[LV_HOR_RES_MAX * LV_VER_RES_MAX];
+#else
 /* You can try to change buffer to internal ram by uncommenting line below and commenting
  * SDRAM one. */
 __attribute__((section(".SD_RAM"))) static uintpixel_t my_fb[TFT_HOR_RES * TFT_VER_RES];
+static lv_color_t buf1_1[LV_HOR_RES_MAX * 68];
+static lv_color_t buf1_2[LV_HOR_RES_MAX * 68];
 
 static int32_t            x1_flush;
 static int32_t            y1_flush;
@@ -75,8 +84,10 @@ static int32_t            x2_flush;
 static int32_t            y2_fill;
 static int32_t            y_fill_act;
 static const lv_color_t * buf_to_flush;
-
+#endif
 static lv_disp_t *our_disp = NULL;
+
+static uintpixel_t *current_frame_buffer;
 /**********************
  *      MACROS
  **********************/
@@ -101,15 +112,11 @@ void tft_init(void)
    /*-----------------------------
 	* Create a buffer for drawing
 	*----------------------------*/
-
-   /* LittlevGL requires a buffer where it draws the objects. The buffer's has to be greater than 1 display row*/
-
-	static lv_disp_buf_t disp_buf_1;
-	static lv_color_t buf1_1[LV_HOR_RES_MAX * 68];
-	static lv_color_t buf1_2[LV_HOR_RES_MAX * 68];
+#if(USE_DOUBLE_BUUFER == 1)
+	lv_disp_buf_init(&disp_buf_1, buf1_1, buf1_2, LV_HOR_RES_MAX * LV_VER_RES_MAX);   /*Initialize the display buffer*/
+#else
 	lv_disp_buf_init(&disp_buf_1, buf1_1, buf1_2, LV_HOR_RES_MAX * 68);   /*Initialize the display buffer*/
-
-
+#endif
 	/*-----------------------------------
 	* Register the display in LittlevGL
 	*----------------------------------*/
@@ -144,6 +151,7 @@ void tft_init(void)
  * This function is required only when LV_VDB_SIZE != 0 in lv_conf.h*/
 static void ex_disp_flush(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t * color_p)
 {
+#if 0
 	int32_t x1 = area->x1;
 	int32_t x2 = area->x2;
 	int32_t y1 = area->y1;
@@ -183,6 +191,11 @@ static void ex_disp_flush(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t 
     {
         while(1);	/*Halt on error*/
     }
+#else
+	current_frame_buffer = color_p;
+	HAL_LTDC_SetAddress(&hltdc, (uint32_t)color_p, 0);
+	lv_disp_flush_ready(&our_disp->driver);
+#endif
 }
 
 /**
@@ -192,15 +205,10 @@ static void ex_disp_flush(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t 
 static uint8_t LCD_Init(void)
 {
 	// LTDC congigured in cube
-
+#if(USE_DOUBLE_BUUFER == 0)
+	current_frame_buffer = my_fb;
 	HAL_LTDC_SetAddress(&hltdc, (uint32_t)my_fb, 0);
-
-    uint32_t i;
-    for(i = 0; i < (TFT_HOR_RES * TFT_VER_RES) ; i++)
-    {
-        my_fb[i] = 0;
-    }
-
+#endif
     return LCD_OK;
 }
 
@@ -221,6 +229,7 @@ static void DMA_Config(void)
   */
 static void DMA_TransferComplete(DMA_HandleTypeDef *han)
 {
+#if(USE_DOUBLE_BUUFER == 0)
     y_fill_act ++;
 
     if(y_fill_act > y2_fill) {
@@ -241,6 +250,7 @@ static void DMA_TransferComplete(DMA_HandleTypeDef *han)
             while(1);	/*Halt on error*/
         }
     }
+#endif
 }
 
 /**
@@ -302,5 +312,5 @@ static void DMA2D_Config(void)
 
 void *LCD_Get_Frame_Buffer(void)
 {
-	return my_fb;
+	return current_frame_buffer;
 }

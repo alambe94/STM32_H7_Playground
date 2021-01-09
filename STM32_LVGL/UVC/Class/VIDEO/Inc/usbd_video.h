@@ -70,7 +70,7 @@ extern "C" {
 #endif /* UVC_CAM_FPS_FS */
 
 #ifndef UVC_CAM_FPS_HS
-#define UVC_CAM_FPS_HS                                30U
+#define UVC_CAM_FPS_HS                                5U
 #endif /* UVC_CAM_FPS_HS */
 
 #ifndef UVC_PACKET_SIZE

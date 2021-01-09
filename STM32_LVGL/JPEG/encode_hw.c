@@ -21,7 +21,7 @@ uint32_t JPEG_Encode_HW(JPEG_HandleTypeDef *hjpeg,
   Conf.ImageHeight = img_y;
   Conf.ChromaSubsampling = JPEG_420_SUBSAMPLING;
   Conf.ColorSpace = JPEG_YCBCR_COLORSPACE;
-  Conf.ImageQuality = 95;
+  Conf.ImageQuality = 75;
 
   JPEG_GetEncodeColorConvertFunc(&Conf, &pRGBToYCbCr_Convert_Function, &ycbcr_mcu);
 

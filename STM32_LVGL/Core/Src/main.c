@@ -19,6 +19,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
 #include "dma.h"
 #include "dma2d.h"
 #include "i2c.h"
@@ -36,15 +37,6 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "usb_device.h"
-#include "encode.h"
-#include "encode_hw.h"
-
-#include "lvgl/lvgl.h"
-#include "hal_stm_lvgl/tft/tft.h"
-#include "hal_stm_lvgl/touchpad/touchpad.h"
-#include "lv_examples/lv_examples.h"
-
-uint8_t img_tmp[480*272*2];
 
 /* USER CODE END Includes */
 
@@ -70,6 +62,7 @@ uint8_t img_tmp[480*272*2];
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
+void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
@@ -126,31 +119,20 @@ int main(void)
   MX_DMA2D_Init();
   MX_LIBJPEG_Init();
   /* USER CODE BEGIN 2 */
+  extern void LVGL_Thread_Add(void);
+  extern void JPEG_Thread_Add(void);
   MX_USB_DEVICE_Init();
 
-  extern void *LCD_Get_Frame_Buffer(void);
-  extern void *UVC_Get_Frame_Buffer(uint32_t *size);
-  extern void UVC_Set_Event(uint32_t size, uint8_t encoded_flag);
-  extern uint8_t UVC_Get_Event(void);
-
-  uint32_t jpj_sz = 0x00;
-  uint32_t out_jpj_sz = 0x00;
-  uint8_t *out_jpj = UVC_Get_Frame_Buffer(&out_jpj_sz);
-  uint8_t *in_jpj = LCD_Get_Frame_Buffer();
-
-  JPEG_InitColorTables();
-
-  lv_init();
-
-  tft_init();
-  touchpad_init();
-
-  //lv_demo_music();
-  //lv_demo_stress();
-  lv_demo_widgets();
-
+  LVGL_Thread_Add();
+  JPEG_Thread_Add();
   /* USER CODE END 2 */
 
+  /* Call init function for freertos objects (in freertos.c) */
+  MX_FREERTOS_Init();
+  /* Start scheduler */
+  osKernelStart();
+
+  /* We should never get here as control is now taken by the scheduler */
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
@@ -158,21 +140,6 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	HAL_Delay(5);
-
-	lv_task_handler();
-
-	if(UVC_Get_Event())
-	{
-	  jpj_sz = JPEG_Encode_HW(&hjpeg,
-			                  (uint8_t*)in_jpj,
-					          480,
-					          272,
-					          2,
-					          img_tmp,
-					          out_jpj);
-	  UVC_Set_Event(jpj_sz, 1);
-	}
   }
   /* USER CODE END 3 */
 }
@@ -282,6 +249,27 @@ void SystemClock_Config(void)
 /* USER CODE BEGIN 4 */
 
 /* USER CODE END 4 */
+
+ /**
+  * @brief  Period elapsed callback in non blocking mode
+  * @note   This function is called  when TIM17 interrupt took place, inside
+  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+  * a global variable "uwTick" used as application time base.
+  * @param  htim : TIM handle
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+  /* USER CODE BEGIN Callback 0 */
+
+  /* USER CODE END Callback 0 */
+  if (htim->Instance == TIM17) {
+    HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+
+  /* USER CODE END Callback 1 */
+}
 
 /**
   * @brief  This function is executed in case of error occurrence.
