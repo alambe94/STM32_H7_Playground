@@ -115,14 +115,15 @@ int main(void)
   JPEG_InitColorTables();
   static uint8_t img_tmp[320*240*2];
 
-  JPEG_OutImageSize = JPEG_Encode_HW_DMA(&hjpeg,
-		                             (uint8_t*)Image_RGB565,
+  JPEG_Encode_HW_DMA(&hjpeg,
+		             (uint8_t*)Image_RGB565,
 				                     320,
 				                     240,
 				                     2,
 				                     img_tmp,
 				                     out_jpj);
-  JPEG_OutImageSize = jpj_sz;
+
+  while(!JPEG_Get_Status(&JPEG_OutImageSize));
   /* USER CODE END 2 */
 
   /* Infinite loop */
