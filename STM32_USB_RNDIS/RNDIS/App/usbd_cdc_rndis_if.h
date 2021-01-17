@@ -33,8 +33,8 @@
 /*Static IP ADDRESS: IP_ADDR0.IP_ADDR1.IP_ADDR2.IP_ADDR3 */
 #define IP_ADDR0                                192U
 #define IP_ADDR1                                168U
-#define IP_ADDR2                                0U
-#define IP_ADDR3                                10U
+#define IP_ADDR2                                31U
+#define IP_ADDR3                                50U
 
 /*NETMASK*/
 #define NETMASK_ADDR0                           255U
@@ -45,7 +45,7 @@
 /*Gateway Address*/
 #define GW_ADDR0                                192U
 #define GW_ADDR1                                168U
-#define GW_ADDR2                                0U
+#define GW_ADDR2                                31U
 #define GW_ADDR3                                1U
 
 /* Ensure this MAC address value is same as MAC_ADDRx declared in STM32xxx_conf.h */

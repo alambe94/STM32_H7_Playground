@@ -27,6 +27,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "usb_device.h"
+#include "usbd_cdc_rndis_if.h"
 #include "lwip/netif.h"
 /* USER CODE END Includes */
 
@@ -107,6 +109,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	extern USBD_HandleTypeDef  hUsbDeviceHS;
+	USBD_CDC_RNDIS_fops.Process(&hUsbDeviceHS);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

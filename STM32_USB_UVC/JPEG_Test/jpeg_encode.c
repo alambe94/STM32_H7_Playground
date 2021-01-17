@@ -63,7 +63,7 @@ uint32_t JPEG_Encode_HW(JPEG_HandleTypeDef *hjpeg,
                         uint32_t img_x,     // image width
                         uint32_t img_y,     // image hight
                         uint8_t img_bytpp,  // bytes per pixel
-						uint8_t quality,     // out jpeg quality
+                        uint8_t quality,    // out jpeg quality
                         uint8_t *ycbcr_tmp, // temperory buffer for ycbcr conversion, must be sizes appropriately
                         uint8_t *jpg_out)   // where out jpeg is stored, must be sizes appropriately
 {
@@ -102,7 +102,7 @@ void JPEG_Encode_HW_DMA(JPEG_HandleTypeDef *hjpeg,
                         uint32_t img_x,     // image width
                         uint32_t img_y,     // image hight
                         uint8_t img_bytpp,  // bytes per pixel
-						uint8_t quality,     // out jpeg quality
+                        uint8_t quality,    // out jpeg quality
                         uint8_t *ycbcr_tmp, // temperory buffer for ycbcr conversion, must be sizes appropriately
                         uint8_t *jpg_out)   // where out jpeg is stored, must be sizes appropriately
 {
