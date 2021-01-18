@@ -48,7 +48,7 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+uint32_t FPS;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -105,10 +105,13 @@ int main(void)
   MX_USB_DEVICE_Init();
 
   uint32_t out_sz = 0;
+  uint32_t snt_cnt = 0;
+  uint32_t tm_stmp = 0;
 
   extern void UVC_Set_Event(uint32_t size, uint8_t encoded_flag);
   extern void *UVC_Get_Frame_Buffer(uint32_t *size);
-  extern uint32_t JPEG_OutImageSize;
+  uint8_t UVC_Get_Event(void);
+
   extern uint32_t Image_RGB888[];
   extern uint32_t Image_RGB565[];
 
@@ -146,6 +149,22 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
+  while(!UVC_Get_Event())
+  {
+
+  }
+  snt_cnt++;
+
+  if(HAL_GetTick() - tm_stmp >= 100)
+  {
+	FPS = snt_cnt;
+	snt_cnt = 0;
+	tm_stmp = HAL_GetTick();
+  }
+
+  UVC_Set_Event(out_sz, 1);
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
