@@ -579,8 +579,12 @@ static uint8_t  USBD_VIDEO_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef 
   return ret;
 }
 
-uint8_t UVC_IMG[UVC_MAX_FRAME_SIZE];
-uint32_t JPEG_OutImageSize;
+uint8_t JPEG_IMG[32*1024];
+uint32_t JPEG_Image_Size;
+uint32_t JPEG_Packet_CNT;
+uint32_t JPEG_Packet_Size;
+uint32_t JPEG_Last_Packet_Size;
+uint8_t JPEG_IMG_Sent_Flag;
 
 /**
   * @brief  USBD_VIDEO_DataIn
@@ -596,6 +600,7 @@ static uint8_t  USBD_VIDEO_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
   static uint8_t packet[UVC_PACKET_SIZE];
   static uint8_t frame_toggle;
   static uint32_t image_index;
+  static uint32_t packet_index;
 
   /* Check if the Streaming has already been started */
   if (hVIDEO->uvc_state == UVC_PLAY_STATUS_STREAMING)
@@ -603,28 +608,38 @@ static uint8_t  USBD_VIDEO_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
 	  uint16_t PcktSze = 0;
 	  uint16_t SndCnt = 0;
 
-	  PcktSze = MIN(JPEG_OutImageSize-image_index, UVC_PACKET_SIZE-2);
+	  if(packet_index < JPEG_Packet_CNT)
+	  {
+		  packet_index++;
+		  PcktSze = JPEG_Packet_Size;
+	  }
+	  else
+	  {
+		  packet_index = 0;
+		  PcktSze = JPEG_Last_Packet_Size;
+	  }
 
 	  if(hVIDEO->sof == 1 || image_index==0)
 	  {
 		  hVIDEO->sof = 0;
 		  packet[0] = 0x02;
 		  packet[1] = frame_toggle;
-		  (void)USBD_memcpy((packet + 2U), (UVC_IMG+image_index), PcktSze);
+		  (void)USBD_memcpy((packet + 2U), (JPEG_IMG+image_index), PcktSze);
 		  SndCnt = PcktSze+2;
 	  }
 	  else
 	  {
-		  (void)USBD_memcpy(packet, (UVC_IMG+image_index), PcktSze);
+		  (void)USBD_memcpy(packet, (JPEG_IMG+image_index), PcktSze);
 		  SndCnt = PcktSze;
 	  }
 
 	  image_index += PcktSze;
 
-	  if(PcktSze<UVC_PACKET_SIZE-2)
+	  if(packet_index == 0)
 	  {
 		frame_toggle ^= 0x01U;
 		image_index = 0;
+		JPEG_IMG_Sent_Flag = 1;
 	  }
 
     /* Transmit the packet on Endpoint */
@@ -1007,9 +1022,24 @@ uint8_t USBD_VIDEO_RegisterInterface(USBD_HandleTypeDef   *pdev, USBD_VIDEO_ItfT
   return (uint8_t)USBD_OK;
 }
 
-void *UVC_Get_Frame_Buffer(void)
+void *UVC_Get_Frame_Buffer(uint32_t *size)
 {
-	return UVC_IMG;
+	*size = sizeof(JPEG_IMG);
+	return JPEG_IMG;
+}
+
+void UVC_Set_Event(uint32_t size, uint8_t encoded_flag)
+{
+	JPEG_Image_Size = size;
+	JPEG_Packet_CNT = JPEG_Image_Size/(UVC_PACKET_SIZE-2);
+	JPEG_Packet_Size = (UVC_PACKET_SIZE-2);
+	JPEG_Last_Packet_Size = JPEG_Image_Size%(UVC_PACKET_SIZE-2);
+	JPEG_IMG_Sent_Flag = 0;
+}
+
+uint8_t UVC_Get_Event(void)
+{
+	return JPEG_IMG_Sent_Flag;
 }
 
 /**

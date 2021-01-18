@@ -58,7 +58,6 @@ namespace wolfSSL.CSharp {
             private GCHandle rec_cb;
             private GCHandle snd_cb;
             private GCHandle psk_cb;
-            private GCHandle vrf_cb;
             private IntPtr ctx;
 
             public void set_receive(GCHandle input)
@@ -88,19 +87,6 @@ namespace wolfSSL.CSharp {
                 return this.psk_cb;
             }
 
-            public void set_vrf(GCHandle input)
-            {
-                if (!Object.Equals(this.vrf_cb, default(GCHandle)))
-                {
-                    this.vrf_cb.Free();
-                }
-                this.vrf_cb = input;
-            }
-            public GCHandle get_vrf()
-            {
-                return this.vrf_cb;
-            }
-
             public void set_ctx(IntPtr input)
             {
                 this.ctx = input;
@@ -128,10 +114,6 @@ namespace wolfSSL.CSharp {
                 {
                     this.psk_cb.Free();
                 }
-                if (!Object.Equals(this.vrf_cb, default(GCHandle)))
-                {
-                    this.vrf_cb.Free();
-                }
             }
         }
 
@@ -143,7 +125,6 @@ namespace wolfSSL.CSharp {
         {
             private GCHandle fd_pin;
             private GCHandle psk_cb;
-            private GCHandle vrf_cb;
             private IntPtr ssl;
 
             public void set_fd(GCHandle input)
@@ -162,19 +143,6 @@ namespace wolfSSL.CSharp {
             public GCHandle get_psk()
             {
                 return this.psk_cb;
-            }
-
-            public void set_vrf(GCHandle input)
-            {
-                if (!Object.Equals(this.vrf_cb, default(GCHandle)))
-                {
-                    this.vrf_cb.Free();
-                }
-                this.vrf_cb = input;
-            }
-            public GCHandle get_vrf()
-            {
-                return this.vrf_cb;
             }
 
             public void set_ssl(IntPtr input)
@@ -196,10 +164,6 @@ namespace wolfSSL.CSharp {
                 if (!Object.Equals(this.psk_cb, default(GCHandle)))
                 {
                     this.psk_cb.Free();
-                }
-                if (!Object.Equals(this.vrf_cb, default(GCHandle)))
-                {
-                    this.vrf_cb.Free();
                 }
             }
         }
@@ -1873,20 +1837,11 @@ namespace wolfSSL.CSharp {
         {
             try
             {
-                GCHandle   gch;
-                ctx_handle handles;
-                IntPtr     local_ctx = unwrap_ctx(ctx);
+                IntPtr local_ctx = unwrap_ctx(ctx);
                 if (local_ctx == IntPtr.Zero)
                 {
                     log(ERROR_LOG, "CTX set_verify error");
                     return FAILURE;
-                }
-
-                /* pin the verify callback to protect from garbage collection */
-                if (!vc.Equals(null)) {
-                    gch = GCHandle.FromIntPtr(ctx);
-                    handles = (ctx_handle)gch.Target;
-                    handles.set_vrf(GCHandle.Alloc(vc));
                 }
 
                 wolfSSL_CTX_set_verify(local_ctx, mode, vc);
@@ -1909,20 +1864,11 @@ namespace wolfSSL.CSharp {
         {
             try
             {
-                GCHandle   gch;
-                ssl_handle handles;
-                IntPtr     local_ssl = unwrap_ssl(ssl);
+                IntPtr local_ssl = unwrap_ssl(ssl);
                 if (local_ssl == IntPtr.Zero)
                 {
                     log(ERROR_LOG, "set_verify error");
                     return FAILURE;
-                }
-
-                /* pin the verify callback to protect from garbage collection */
-                if (!vc.Equals(null)) {
-                    gch = GCHandle.FromIntPtr(ssl);
-                    handles = (ssl_handle)gch.Target;
-                    handles.set_vrf(GCHandle.Alloc(vc));
                 }
 
                 wolfSSL_set_verify(local_ssl, mode, vc);

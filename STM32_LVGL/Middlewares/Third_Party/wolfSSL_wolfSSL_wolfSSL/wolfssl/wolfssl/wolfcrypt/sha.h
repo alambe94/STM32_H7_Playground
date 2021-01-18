@@ -72,12 +72,6 @@
 #ifdef WOLFSSL_ESP32WROOM32_CRYPT
     #include <wolfssl/wolfcrypt/port/Espressif/esp32-crypt.h>
 #endif
-#ifdef WOLFSSL_IMXRT_DCP
-    #include <wolfssl/wolfcrypt/port/nxp/dcp_port.h>
-#endif
-#if defined(WOLFSSL_SILABS_SE_ACCEL)
-    #include <wolfssl/wolfcrypt/port/silabs/silabs_hash.h>
-#endif
 
 #if !defined(NO_OLD_SHA_NAMES)
     #define SHA             WC_SHA
@@ -117,8 +111,6 @@ struct wc_Sha {
         ltc_hash_ctx_t ctx;
 #elif defined(STM32_HASH)
         STM32_HASH_Context stmCtx;
-#elif defined(WOLFSSL_SILABS_SE_ACCEL)
-        wc_silabs_sha_t silabsCtx;
 #else
         word32  buffLen;   /* in bytes          */
         word32  loLen;     /* length in bytes   */

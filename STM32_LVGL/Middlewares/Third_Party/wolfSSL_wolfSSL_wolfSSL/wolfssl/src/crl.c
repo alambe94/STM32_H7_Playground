@@ -34,9 +34,7 @@
 #include <wolfssl/internal.h>
 #include <wolfssl/error-ssl.h>
 
-#ifndef WOLFSSL_LINUXKM
-    #include <string.h>
-#endif
+#include <string.h>
 
 #ifdef HAVE_CRL_MONITOR
     #if (defined(__MACH__) || defined(__FreeBSD__) || defined(__linux__))
@@ -542,8 +540,6 @@ static RevokedCert *DupRevokedCertList(RevokedCert* in, void* heap)
         }
         current = current->next;
     }
-
-    (void)heap;
     return head;
 }
 
@@ -551,60 +547,60 @@ static RevokedCert *DupRevokedCertList(RevokedCert* in, void* heap)
 /* returns a deep copy of ent on success and null on fail */
 static CRL_Entry* DupCRL_Entry(const CRL_Entry* ent, void* heap)
 {
-    CRL_Entry *dupl;
+    CRL_Entry *dup;
 
-    dupl = (CRL_Entry*)XMALLOC(sizeof(CRL_Entry), heap, DYNAMIC_TYPE_CRL_ENTRY);
-    if (dupl == NULL) {
+    dup = (CRL_Entry*)XMALLOC(sizeof(CRL_Entry), heap, DYNAMIC_TYPE_CRL_ENTRY);
+    if (dup == NULL) {
         WOLFSSL_MSG("alloc CRL Entry failed");
         return NULL;
     }
-    XMEMSET(dupl, 0, sizeof(CRL_Entry));
+    XMEMSET(dup, 0, sizeof(CRL_Entry));
 
-    XMEMCPY(dupl->issuerHash, ent->issuerHash, CRL_DIGEST_SIZE);
-    XMEMCPY(dupl->lastDate, ent->lastDate, MAX_DATE_SIZE);
-    XMEMCPY(dupl->nextDate, ent->nextDate, MAX_DATE_SIZE);
-    dupl->lastDateFormat = ent->lastDateFormat;
-    dupl->nextDateFormat = ent->nextDateFormat;
-    dupl->certs = DupRevokedCertList(ent->certs, heap);
+    XMEMCPY(dup->issuerHash, ent->issuerHash, CRL_DIGEST_SIZE);
+    XMEMCPY(dup->lastDate, ent->lastDate, MAX_DATE_SIZE);
+    XMEMCPY(dup->nextDate, ent->nextDate, MAX_DATE_SIZE);
+    dup->lastDateFormat = ent->lastDateFormat;
+    dup->nextDateFormat = ent->nextDateFormat;
+    dup->certs = DupRevokedCertList(ent->certs, heap);
 
-    dupl->totalCerts = ent->totalCerts;
-    dupl->verified = ent->verified;
+    dup->totalCerts = ent->totalCerts;
+    dup->verified = ent->verified;
 
     if (!ent->verified) {
-        dupl->tbsSz = ent->tbsSz;
-        dupl->signatureSz = ent->signatureSz;
-        dupl->signatureOID = ent->signatureOID;
-        dupl->toBeSigned = (byte*)XMALLOC(dupl->tbsSz, heap,
+        dup->tbsSz = ent->tbsSz;
+        dup->signatureSz = ent->signatureSz;
+        dup->signatureOID = ent->signatureOID;
+        dup->toBeSigned = (byte*)XMALLOC(dup->tbsSz, heap,
                                           DYNAMIC_TYPE_CRL_ENTRY);
-        if (dupl->toBeSigned == NULL) {
-            FreeCRL_Entry(dupl, heap);
-            XFREE(dupl, heap, DYNAMIC_TYPE_CRL_ENTRY);
+        if (dup->toBeSigned == NULL) {
+            FreeCRL_Entry(dup, heap);
+            XFREE(dup, heap, DYNAMIC_TYPE_CRL_ENTRY);
             return NULL;
         }
 
-        dupl->signature = (byte*)XMALLOC(dupl->signatureSz, heap,
+        dup->signature = (byte*)XMALLOC(dup->signatureSz, heap,
                                          DYNAMIC_TYPE_CRL_ENTRY);
-        if (dupl->signature == NULL) {
-            FreeCRL_Entry(dupl, heap);
-            XFREE(dupl, heap, DYNAMIC_TYPE_CRL_ENTRY);
+        if (dup->signature == NULL) {
+            FreeCRL_Entry(dup, heap);
+            XFREE(dup, heap, DYNAMIC_TYPE_CRL_ENTRY);
             return NULL;
         }
-        XMEMCPY(dupl->toBeSigned, ent->toBeSigned, dupl->tbsSz);
-        XMEMCPY(dupl->signature, ent->signature, dupl->signatureSz);
+        XMEMCPY(dup->toBeSigned, ent->toBeSigned, dup->tbsSz);
+        XMEMCPY(dup->signature, ent->signature, dup->signatureSz);
     #ifndef NO_SKID
-        dupl->extAuthKeyIdSet = ent->extAuthKeyIdSet;
-        if (dupl->extAuthKeyIdSet)
-            XMEMCPY(dupl->extAuthKeyId, ent->extAuthKeyId, KEYID_SIZE);
+        dup->extAuthKeyIdSet = ent->extAuthKeyIdSet;
+        if (dup->extAuthKeyIdSet)
+            XMEMCPY(dup->extAuthKeyId, ent->extAuthKeyId, KEYID_SIZE);
     #endif
     }
     else {
-        dupl->toBeSigned = NULL;
-        dupl->tbsSz = 0;
-        dupl->signature = NULL;
-        dupl->signatureSz = 0;
+        dup->toBeSigned = NULL;
+        dup->tbsSz = 0;
+        dup->signature = NULL;
+        dup->signatureSz = 0;
     }
 
-    return dupl;
+    return dup;
 }
 
 
@@ -644,20 +640,20 @@ static CRL_Entry* DupCRL_list(CRL_Entry* crl, void* heap)
 
 
 /* Duplicates everything except the parent cm pointed to.
- * Expects that Init has already been done to 'dupl'
+ * Expects that Init has already been done to 'dup'
  * return 0 on success */
-static int DupX509_CRL(WOLFSSL_X509_CRL *dupl, const WOLFSSL_X509_CRL* crl)
+static int DupX509_CRL(WOLFSSL_X509_CRL *dup, const WOLFSSL_X509_CRL* crl)
 {
-    if (dupl == NULL || crl == NULL) {
+    if (dup == NULL || crl == NULL) {
         return BAD_FUNC_ARG;
     }
 
     if (crl->monitors[0].path) {
         int pathSz = (int)XSTRLEN(crl->monitors[0].path) + 1;
-        dupl->monitors[0].path = (char*)XMALLOC(pathSz, dupl->heap,
+        dup->monitors[0].path = (char*)XMALLOC(pathSz, dup->heap,
                 DYNAMIC_TYPE_CRL_MONITOR);
-        if (dupl->monitors[0].path != NULL) {
-            XSTRNCPY(dupl->monitors[0].path, crl->monitors[0].path, pathSz);
+        if (dup->monitors[0].path != NULL) {
+            XSTRNCPY(dup->monitors[0].path, crl->monitors[0].path, pathSz);
         }
         else {
             return MEMORY_E;
@@ -666,23 +662,23 @@ static int DupX509_CRL(WOLFSSL_X509_CRL *dupl, const WOLFSSL_X509_CRL* crl)
 
     if (crl->monitors[1].path) {
         int pathSz = (int)XSTRLEN(crl->monitors[1].path) + 1;
-        dupl->monitors[1].path = (char*)XMALLOC(pathSz, dupl->heap,
+        dup->monitors[1].path = (char*)XMALLOC(pathSz, dup->heap,
                 DYNAMIC_TYPE_CRL_MONITOR);
-        if (dupl->monitors[1].path != NULL) {
-            XSTRNCPY(dupl->monitors[1].path, crl->monitors[1].path, pathSz);
+        if (dup->monitors[1].path != NULL) {
+            XSTRNCPY(dup->monitors[1].path, crl->monitors[1].path, pathSz);
         }
         else {
-            if (dupl->monitors[0].path != NULL) {
-                XFREE(dupl->monitors[0].path, dupl->heap,
+            if (dup->monitors[0].path != NULL) {
+                XFREE(dup->monitors[0].path, dup->heap,
                         DYNAMIC_TYPE_CRL_MONITOR);
             }
             return MEMORY_E;
         }
     }
 
-    dupl->crlList = DupCRL_list(crl->crlList, dupl->heap);
+    dup->crlList = DupCRL_list(crl->crlList, dup->heap);
 #ifdef HAVE_CRL_IO
-    dupl->crlIOCb = crl->crlIOCb;
+    dup->crlIOCb = crl->crlIOCb;
 #endif
 
     return 0;
@@ -705,11 +701,6 @@ int wolfSSL_X509_STORE_add_crl(WOLFSSL_X509_STORE *store, WOLFSSL_X509_CRL *newc
             return WOLFSSL_FAILURE;
         }
         store->crl = store->cm->crl = crl;
-        if (wolfSSL_CertManagerEnableCRL(store->cm, WOLFSSL_CRL_CHECKALL)
-                != WOLFSSL_SUCCESS) {
-            WOLFSSL_MSG("wolfSSL_CertManagerEnableCRL error");
-            return WOLFSSL_FAILURE;
-        }
         return WOLFSSL_SUCCESS;
     }
 
@@ -735,12 +726,6 @@ int wolfSSL_X509_STORE_add_crl(WOLFSSL_X509_STORE *store, WOLFSSL_X509_CRL *newc
             tail->next = toAdd;
         }
         wc_UnLockMutex(&crl->crlLock);
-    }
-
-    if (wolfSSL_CertManagerEnableCRL(store->cm, WOLFSSL_CRL_CHECKALL)
-            != WOLFSSL_SUCCESS) {
-        WOLFSSL_MSG("wolfSSL_CertManagerEnableCRL error");
-        return WOLFSSL_FAILURE;
     }
 
     WOLFSSL_LEAVE("wolfSSL_X509_STORE_add_crl", WOLFSSL_SUCCESS);
@@ -1112,17 +1097,7 @@ static void* DoMonitor(void* arg)
         }
 
         if (FD_ISSET(crl->mfd, &readfds)) {
-            word64 r64;
-            int    rlen;
-
             WOLFSSL_MSG("got custom shutdown event, breaking out");
-
-            /* read out the bytes written to the event to clean up */
-            rlen = (int) read(crl->mfd, &r64, sizeof(r64));
-            if (rlen < 0) {
-                WOLFSSL_MSG("read custom event failure");
-            }
-
             break;
         }
 

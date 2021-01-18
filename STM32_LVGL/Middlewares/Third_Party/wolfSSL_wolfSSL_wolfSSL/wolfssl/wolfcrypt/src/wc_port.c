@@ -75,10 +75,6 @@
     #include <wolfssl/wolfcrypt/port/caam/wolfcaam.h>
 #endif
 
-#ifdef WOLFSSL_IMXRT_DCP
-    #include <wolfssl/wolfcrypt/port/nxp/dcp_port.h>
-#endif
-
 #ifdef WOLF_CRYPTO_CB
     #include <wolfssl/wolfcrypt/cryptocb.h>
 #endif
@@ -113,6 +109,7 @@ static volatile int initRefCount = 0;
 int wolfCrypt_Init(void)
 {
     int ret = 0;
+
     if (initRefCount == 0) {
         WOLFSSL_ENTER("wolfCrypt_Init");
 
@@ -216,11 +213,6 @@ int wolfCrypt_Init(void)
         }
     #endif
 
-    #ifdef WOLFSSL_SILABS_SE_ACCEL
-        /* init handles if it is already initialized */
-        ret = sl_se_init();
-    #endif
-
     #ifdef WOLFSSL_ARMASM
         WOLFSSL_MSG("Using ARM hardware acceleration");
     #endif
@@ -268,12 +260,6 @@ int wolfCrypt_Init(void)
 #if defined(WOLFSSL_IMX6_CAAM) || defined(WOLFSSL_IMX6_CAAM_RNG) || \
     defined(WOLFSSL_IMX6_CAAM_BLOB)
         if ((ret = wc_caamInit()) != 0) {
-            return ret;
-        }
-#endif
-
-#ifdef WOLFSSL_IMXRT_DCP
-        if ((ret = wc_dcp_init()) != 0) {
             return ret;
         }
 #endif
@@ -333,9 +319,6 @@ int wolfCrypt_Cleanup(void)
     #if defined(WOLFSSL_CRYPTOCELL)
         cc310_Free();
     #endif
-    #ifdef WOLFSSL_SILABS_SE_ACCEL
-        ret = sl_se_deinit();
-    #endif
     #if defined(WOLFSSL_RENESAS_TSIP_CRYPT)
         tsip_Close();
     #endif
@@ -373,7 +356,7 @@ int wc_FileLoad(const char* fname, unsigned char** buf, size_t* bufLen,
         return BAD_PATH_ERROR;
     }
 
-    XFSEEK(f, 0, XSEEK_END);
+    XFSEEK(f, 0, SEEK_END);
     fileSz = XFTELL(f);
     XREWIND(f);
     if (fileSz > 0) {
@@ -708,7 +691,7 @@ XFILE z_fs_open(const char* filename, const char* perm)
 {
     XFILE file;
 
-    file = (XFILE)XMALLOC(sizeof(*file), NULL, DYNAMIC_TYPE_FILE);
+    file = XMALLOC(sizeof(*file), NULL, DYNAMIC_TYPE_FILE);
     if (file != NULL) {
         if (fs_open(file, filename) != 0) {
             XFREE(file, NULL, DYNAMIC_TYPE_FILE);
@@ -971,40 +954,6 @@ int wolfSSL_CryptHwMutexUnLock(void)
         return 0;
     }
 
-#elif defined(RTTHREAD)
-
-    int wc_InitMutex(wolfSSL_Mutex* m)
-    {
-        int iReturn;
-
-        *m = ( wolfSSL_Mutex ) rt_mutex_create("mutex",RT_IPC_FLAG_FIFO);
-        if( *m != NULL )
-            iReturn = 0;
-        else
-            iReturn = BAD_MUTEX_E;
-
-
-        return iReturn;
-    }
-
-    int wc_FreeMutex(wolfSSL_Mutex* m)
-    {
-        rt_mutex_delete( *m );
-        return 0;
-    }
-
-
-    int wc_LockMutex(wolfSSL_Mutex* m)
-    {
-        /* Assume an infinite block, or should there be zero block? */
-        return rt_mutex_take( *m, RT_WAITING_FOREVER );
-    }
-
-    int wc_UnLockMutex(wolfSSL_Mutex* m)
-    {
-        return rt_mutex_release( *m );
-    }
-
 #elif defined(WOLFSSL_SAFERTOS)
 
     int wc_InitMutex(wolfSSL_Mutex* m)
@@ -1099,35 +1048,6 @@ int wolfSSL_CryptHwMutexUnLock(void)
             return 0;
         else
             return BAD_MUTEX_E;
-    }
-
-#elif defined(WOLFSSL_KTHREADS)
-
-    /* Linux kernel mutex routines are voids, alas. */
-
-    int wc_InitMutex(wolfSSL_Mutex* m)
-    {
-        mutex_init(m);
-        return 0;
-    }
-
-    int wc_FreeMutex(wolfSSL_Mutex* m)
-    {
-        mutex_destroy(m);
-        return 0;
-    }
-
-    int wc_LockMutex(wolfSSL_Mutex* m)
-    {
-        mutex_lock(m);
-        return 0;
-    }
-
-
-    int wc_UnLockMutex(wolfSSL_Mutex* m)
-    {
-        mutex_unlock(m);
-        return 0;
     }
 
 #elif defined(WOLFSSL_VXWORKS)
@@ -1274,23 +1194,14 @@ int wolfSSL_CryptHwMutexUnLock(void)
     }
 
 #elif defined(MICRIUM)
-    #if (OS_VERSION < 50000)
-        #define MICRIUM_ERR_TYPE OS_ERR
-        #define MICRIUM_ERR_NONE OS_ERR_NONE
-        #define MICRIUM_ERR_CODE(err) err
-    #else
-        #define MICRIUM_ERR_TYPE RTOS_ERR
-        #define MICRIUM_ERR_NONE RTOS_ERR_NONE
-        #define MICRIUM_ERR_CODE(err)    RTOS_ERR_CODE_GET(err)
-    #endif
 
     int wc_InitMutex(wolfSSL_Mutex* m)
     {
-        MICRIUM_ERR_TYPE err;
+        OS_ERR err;
 
         OSMutexCreate(m, "wolfSSL Mutex", &err);
 
-        if (MICRIUM_ERR_CODE(err) == MICRIUM_ERR_NONE)
+        if (err == OS_ERR_NONE)
             return 0;
         else
             return BAD_MUTEX_E;
@@ -1299,27 +1210,26 @@ int wolfSSL_CryptHwMutexUnLock(void)
     int wc_FreeMutex(wolfSSL_Mutex* m)
     {
         #if (OS_CFG_MUTEX_DEL_EN == DEF_ENABLED)
-            MICRIUM_ERR_TYPE err;
+            OS_ERR err;
 
             OSMutexDel(m, OS_OPT_DEL_ALWAYS, &err);
 
-            if (MICRIUM_ERR_CODE(err) == MICRIUM_ERR_NONE)
+            if (err == OS_ERR_NONE)
                 return 0;
             else
                 return BAD_MUTEX_E;
         #else
-            (void)m;
             return 0;
         #endif
     }
 
     int wc_LockMutex(wolfSSL_Mutex* m)
     {
-        MICRIUM_ERR_TYPE err;
+        OS_ERR err;
 
         OSMutexPend(m, 0, OS_OPT_PEND_BLOCKING, NULL, &err);
 
-        if (MICRIUM_ERR_CODE(err) == MICRIUM_ERR_NONE)
+        if (err == OS_ERR_NONE)
             return 0;
         else
             return BAD_MUTEX_E;
@@ -1327,11 +1237,11 @@ int wolfSSL_CryptHwMutexUnLock(void)
 
     int wc_UnLockMutex(wolfSSL_Mutex* m)
     {
-        MICRIUM_ERR_TYPE err;
+        OS_ERR err;
 
         OSMutexPost(m, OS_OPT_POST_NONE, &err);
 
-        if (MICRIUM_ERR_CODE(err) == MICRIUM_ERR_NONE)
+        if (err == OS_ERR_NONE)
             return 0;
         else
             return BAD_MUTEX_E;
@@ -2106,9 +2016,7 @@ struct tm* gmtime(const time_t* timer)
     }
 
     ret->tm_mday  = (int)++dayno;
-#ifndef WOLFSSL_LINUXKM
     ret->tm_isdst = 0;
-#endif
 
     return ret;
 }
@@ -2242,7 +2150,7 @@ time_t XTIME(time_t * timer)
 #if defined(WOLFSSL_XILINX)
 #include "xrtcpsu.h"
 
-time_t xilinx_time(time_t * timer)
+time_t XTIME(time_t * timer)
 {
     time_t sec = 0;
     XRtcPsu_Config* con;
@@ -2351,24 +2259,6 @@ time_t wiced_pseudo_unix_epoch_time(time_t * timer)
     }
     #endif /* !NO_CRYPT_BENCHMARK */
 #endif /* WOLFSSL_TELIT_M2MB */
-
-
-#if defined(WOLFSSL_LINUXKM)
-time_t time(time_t * timer)
-{
-    time_t ret;
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 0, 0)
-    struct timespec ts;
-    getnstimeofday(&ts);
-    ret = ts.tv_sec * 1000000000LL + ts.tv_nsec;
-#else
-    ret = ktime_get_real_seconds();
-#endif
-    if (timer)
-        *timer = ret;
-    return ret;
-}
-#endif /* WOLFSSL_LINUXKM */
 
 #endif /* !NO_ASN_TIME */
 

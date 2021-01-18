@@ -2,8 +2,6 @@
 
 # ocsp.test
 
-# Note, this script makes connection(s) to the public Internet.
-
 server=www.globalsign.com
 ca=certs/external/ca-globalsign-root.pem
 

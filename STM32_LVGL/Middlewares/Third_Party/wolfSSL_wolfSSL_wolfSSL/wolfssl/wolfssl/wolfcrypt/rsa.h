@@ -141,9 +141,8 @@ enum {
     RSA_PSS_SALT_LEN_DISCOVER = -2,
 #endif
 
-#ifdef WOLF_CRYPTO_CB
+#ifdef HAVE_PKCS11
     RSA_MAX_ID_LEN      = 32,
-    RSA_MAX_LABEL_LEN   = 32,
 #endif
 };
 
@@ -185,11 +184,9 @@ struct RsaKey {
     byte*  mod;
     XSecure_Rsa xRsa;
 #endif
-#ifdef WOLF_CRYPTO_CB
+#ifdef HAVE_PKCS11
     byte id[RSA_MAX_ID_LEN];
     int  idLen;
-    char label[RSA_MAX_LABEL_LEN];
-    int  labelLen;
 #endif
 #if defined(WOLFSSL_ASYNC_CRYPT) || !defined(WOLFSSL_RSA_VERIFY_INLINE)
     byte   dataIsAlloc;
@@ -216,11 +213,9 @@ struct RsaKey {
 WOLFSSL_API int  wc_InitRsaKey(RsaKey* key, void* heap);
 WOLFSSL_API int  wc_InitRsaKey_ex(RsaKey* key, void* heap, int devId);
 WOLFSSL_API int  wc_FreeRsaKey(RsaKey* key);
-#ifdef WOLF_CRYPTO_CB
+#ifdef HAVE_PKCS11
 WOLFSSL_API int wc_InitRsaKey_Id(RsaKey* key, unsigned char* id, int len,
                                  void* heap, int devId);
-WOLFSSL_API int wc_InitRsaKey_Label(RsaKey* key, const char* label, void* heap,
-                                    int devId);
 #endif
 WOLFSSL_API int  wc_CheckRsaKey(RsaKey* key);
 #ifdef WOLFSSL_XILINX_CRYPT
@@ -251,9 +246,6 @@ WOLFSSL_API int  wc_RsaSSL_Verify(const byte* in, word32 inLen, byte* out,
                               word32 outLen, RsaKey* key);
 WOLFSSL_API int  wc_RsaSSL_Verify_ex(const byte* in, word32 inLen, byte* out,
                               word32 outLen, RsaKey* key, int pad_type);
-WOLFSSL_API int  wc_RsaSSL_Verify_ex2(const byte* in, word32 inLen, byte* out,
-                              word32 outLen, RsaKey* key, int pad_type,
-                              enum wc_HashType hash);
 WOLFSSL_API int  wc_RsaPSS_VerifyInline(byte* in, word32 inLen, byte** out,
                                         enum wc_HashType hash, int mgf,
                                         RsaKey* key);
@@ -374,8 +366,6 @@ WOLFSSL_LOCAL int wc_RsaUnPad_ex(byte* pkcsBlock, word32 pkcsBlockLen, byte** ou
                                    byte padValue, int padType, enum wc_HashType hType,
                                    int mgf, byte* optLabel, word32 labelLen, int saltLen,
                                    int bits, void* heap);
-
-WOLFSSL_LOCAL int wc_hash2mgf(enum wc_HashType hType);
 
 #endif /* HAVE_USER_RSA */
 

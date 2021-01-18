@@ -1209,11 +1209,7 @@ static int GeneratePrivateDh(DhKey* key, WC_RNG* rng, byte* priv,
             #endif
         }
 
-        if (sz > *privSz)
-            ret = WC_KEY_SIZE_E;
-
-        if (ret == 0)
-            ret = wc_RNG_GenerateBlock(rng, priv, sz);
+        ret = wc_RNG_GenerateBlock(rng, priv, sz);
 
         if (ret == 0) {
             priv[0] |= 0x0C;
@@ -1237,7 +1233,6 @@ static int GeneratePublicDh(DhKey* key, byte* priv, word32 privSz,
 {
     int ret = 0;
 #ifndef WOLFSSL_SP_MATH
-    word32 binSz = 0;
 #ifdef WOLFSSL_SMALL_STACK
     mp_int* x;
     mp_int* y;
@@ -1262,7 +1257,7 @@ static int GeneratePublicDh(DhKey* key, byte* priv, word32 privSz,
 #endif
 #endif
 
-#if !defined(WOLFSSL_SP_MATH)
+#ifndef WOLFSSL_SP_MATH
 #ifdef WOLFSSL_SMALL_STACK
     x = (mp_int*)XMALLOC(sizeof(mp_int), key->heap, DYNAMIC_TYPE_DH);
     if (x == NULL)
@@ -1287,18 +1282,11 @@ static int GeneratePublicDh(DhKey* key, byte* priv, word32 privSz,
     if (ret == 0 && mp_exptmod(&key->g, x, &key->p, y) != MP_OKAY)
         ret = MP_EXPTMOD_E;
 
-    if (ret == 0) {
-        binSz = mp_unsigned_bin_size(y);
-        if (binSz > *pubSz) {
-            ret = WC_KEY_SIZE_E;
-        }
-    }
-
     if (ret == 0 && mp_to_unsigned_bin(y, pub) != MP_OKAY)
         ret = MP_TO_E;
 
     if (ret == 0)
-        *pubSz = binSz;
+        *pubSz = mp_unsigned_bin_size(y);
 
     mp_clear(y);
     mp_clear(x);
@@ -1482,7 +1470,6 @@ int wc_DhCheckPubKey_ex(DhKey* key, const byte* pub, word32 pubSz,
             ret = MP_INIT_E;
     }
 
-    /* SP 800-56Ar3, section 5.6.2.3.1, process step 2 */
     if (ret == 0 && prime != NULL) {
 #ifdef WOLFSSL_HAVE_SP_DH
 #ifndef WOLFSSL_SP_NO_2048
@@ -1512,7 +1499,8 @@ int wc_DhCheckPubKey_ex(DhKey* key, const byte* pub, word32 pubSz,
 #endif
 
         {
-#if !defined(WOLFSSL_SP_MATH)
+    /* SP 800-56Ar3, section 5.6.2.3.1, process step 2 */
+#ifndef WOLFSSL_SP_MATH
             /* calculate (y^q) mod(p), store back into y */
             if (mp_exptmod(y, q, p, y) != MP_OKAY)
                 ret = MP_EXPTMOD_E;
@@ -1797,7 +1785,7 @@ int wc_DhCheckKeyPair(DhKey* key, const byte* pub, word32 pubSz,
 #endif
 #endif
         {
-#if !defined(WOLFSSL_SP_MATH)
+#ifndef WOLFSSL_SP_MATH
             if (mp_exptmod(&key->g, privateKey, &key->p, checkKey) != MP_OKAY)
                 ret = MP_EXPTMOD_E;
 #else
@@ -1853,14 +1841,14 @@ static int wc_DhAgree_Sync(DhKey* key, byte* agree, word32* agreeSz,
 {
     int ret = 0;
 #ifdef WOLFSSL_SMALL_STACK
-    mp_int* y = NULL;
-#if !defined(WOLFSSL_SP_MATH)
-    mp_int* x = NULL;
-    mp_int* z = NULL;
+    mp_int* y;
+#ifndef WOLFSSL_SP_MATH
+    mp_int* x;
+    mp_int* z;
 #endif
 #else
     mp_int y[1];
-#if !defined(WOLFSSL_SP_MATH)
+#ifndef WOLFSSL_SP_MATH
     mp_int x[1];
     mp_int z[1];
 #endif
@@ -1882,7 +1870,7 @@ static int wc_DhAgree_Sync(DhKey* key, byte* agree, word32* agreeSz,
     y = (mp_int*)XMALLOC(sizeof(mp_int), key->heap, DYNAMIC_TYPE_DH);
     if (y == NULL)
         return MEMORY_E;
-#if !defined(WOLFSSL_SP_MATH)
+#ifndef WOLFSSL_SP_MATH
     x = (mp_int*)XMALLOC(sizeof(mp_int), key->heap, DYNAMIC_TYPE_DH);
     if (x == NULL) {
         XFREE(y, key->heap, DYNAMIC_TYPE_DH);
@@ -1911,7 +1899,7 @@ static int wc_DhAgree_Sync(DhKey* key, byte* agree, word32* agreeSz,
 
         mp_clear(y);
     #ifdef WOLFSSL_SMALL_STACK
-    #if !defined(WOLFSSL_SP_MATH)
+    #ifndef WOLFSSL_SP_MATH
         XFREE(z, key->heap, DYNAMIC_TYPE_DH);
         XFREE(x, key->heap, DYNAMIC_TYPE_DH);
     #endif
@@ -1933,7 +1921,7 @@ static int wc_DhAgree_Sync(DhKey* key, byte* agree, word32* agreeSz,
 
         mp_clear(y);
     #ifdef WOLFSSL_SMALL_STACK
-    #if !defined(WOLFSSL_SP_MATH)
+    #ifndef WOLFSSL_SP_MATH
         XFREE(z, key->heap, DYNAMIC_TYPE_DH);
         XFREE(x, key->heap, DYNAMIC_TYPE_DH);
     #endif
@@ -1955,7 +1943,7 @@ static int wc_DhAgree_Sync(DhKey* key, byte* agree, word32* agreeSz,
 
         mp_clear(y);
     #ifdef WOLFSSL_SMALL_STACK
-    #if !defined(WOLFSSL_SP_MATH)
+    #ifndef WOLFSSL_SP_MATH
         XFREE(z, key->heap, DYNAMIC_TYPE_DH);
         XFREE(x, key->heap, DYNAMIC_TYPE_DH);
     #endif
@@ -1966,7 +1954,7 @@ static int wc_DhAgree_Sync(DhKey* key, byte* agree, word32* agreeSz,
 #endif
 #endif
 
-#if !defined(WOLFSSL_SP_MATH)
+#ifndef WOLFSSL_SP_MATH
     if (mp_init_multi(x, y, z, 0, 0, 0) != MP_OKAY) {
     #ifdef WOLFSSL_SMALL_STACK
         XFREE(z, key->heap, DYNAMIC_TYPE_DH);
@@ -2001,7 +1989,7 @@ static int wc_DhAgree_Sync(DhKey* key, byte* agree, word32* agreeSz,
 #endif
 
 #ifdef WOLFSSL_SMALL_STACK
-#if !defined(WOLFSSL_SP_MATH)
+#ifndef WOLFSSL_SP_MATH
     XFREE(z, key->heap, DYNAMIC_TYPE_DH);
     XFREE(x, key->heap, DYNAMIC_TYPE_DH);
 #endif
@@ -2079,45 +2067,6 @@ int wc_DhAgree(DhKey* key, byte* agree, word32* agreeSz, const byte* priv,
 }
 
 #ifdef WOLFSSL_DH_EXTRA
-WOLFSSL_LOCAL int wc_DhKeyCopy(DhKey* src, DhKey* dst)
-{
-    int ret;
-
-    if (!src || !dst || src == dst) {
-        WOLFSSL_MSG("Parameters not provided or are the same");
-        return BAD_FUNC_ARG;
-    }
-
-    if ((ret = mp_copy(&src->p, &dst->p)) != MP_OKAY) {
-        WOLFSSL_MSG("mp_copy error");
-        return ret;
-    }
-
-    if ((ret = mp_copy(&src->g, &dst->g)) != MP_OKAY) {
-        WOLFSSL_MSG("mp_copy error");
-        return ret;
-    }
-
-    if ((ret = mp_copy(&src->q, &dst->q)) != MP_OKAY) {
-        WOLFSSL_MSG("mp_copy error");
-        return ret;
-    }
-
-    if ((ret = mp_copy(&src->pub, &dst->pub)) != MP_OKAY) {
-        WOLFSSL_MSG("mp_copy error");
-        return ret;
-    }
-
-    if ((ret = mp_copy(&src->priv, &dst->priv)) != MP_OKAY) {
-        WOLFSSL_MSG("mp_copy error");
-        return ret;
-    }
-
-    dst->heap = src->heap;
-
-    return MP_OKAY;
-}
-
 /* Sets private and public key in DhKey if both are available, otherwise sets
     either private or public key, depending on which is available. */
 int wc_DhImportKeyPair(DhKey* key, const byte* priv, word32 privSz,

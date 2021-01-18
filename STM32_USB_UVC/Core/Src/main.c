@@ -22,12 +22,13 @@
 #include "jpeg.h"
 #include "libjpeg.h"
 #include "mdma.h"
-#include "usb_device.h"
+#include "usb_otg.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "jpeg_encode.h"
+#include "usb_device.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -96,29 +97,35 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_MDMA_Init();
-  MX_USB_DEVICE_Init();
   MX_LIBJPEG_Init();
   MX_JPEG_Init();
+  MX_USB_OTG_HS_PCD_Init();
   /* USER CODE BEGIN 2 */
-  extern void *UVC_Get_Frame_Buffer(void);
+
+  MX_USB_DEVICE_Init();
+
+  uint32_t out_sz = 0;
+
+  extern void UVC_Set_Event(uint32_t size, uint8_t encoded_flag);
+  extern void *UVC_Get_Frame_Buffer(uint32_t *size);
   extern uint32_t JPEG_OutImageSize;
   extern uint32_t Image_RGB888[];
   extern uint32_t Image_RGB565[];
 
   JPEG_InitColorTables();
   static uint8_t img_tmp[320 * 240 * 2];
-  uint8_t *out_jpj = UVC_Get_Frame_Buffer();
+  uint8_t *out_jpj = UVC_Get_Frame_Buffer(&out_sz);
 
-  JPEG_OutImageSize = JPEG_Encode_SW((uint8_t *)Image_RGB888, 320, 240, 3, 75, out_jpj, 320*240*3);
-
-  JPEG_OutImageSize = JPEG_Encode_HW(&hjpeg,
-                                     (uint8_t *)Image_RGB565,
-                                     320,
-                                     240,
-                                     2,
-                                     75,
-                                     img_tmp,
-                                     out_jpj);
+//  out_sz = JPEG_Encode_SW((uint8_t *)Image_RGB888, 320, 240, 3, 75, out_jpj, out_sz);
+//
+//  out_sz = JPEG_Encode_HW(&hjpeg,
+//                                     (uint8_t *)Image_RGB565,
+//                                     320,
+//                                     240,
+//                                     2,
+//                                     75,
+//                                     img_tmp,
+//                                     out_jpj);
 
   JPEG_Encode_HW_DMA(&hjpeg,
                      (uint8_t *)Image_RGB565,
@@ -129,8 +136,10 @@ int main(void)
                      img_tmp,
                      out_jpj);
 
-  while (!JPEG_Get_Status(&JPEG_OutImageSize))
-    ;
+  while (!JPEG_Get_Status(&out_sz));
+
+  UVC_Set_Event(out_sz, 1);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -162,13 +171,11 @@ void SystemClock_Config(void)
   */
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE0);
 
-  while (!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY))
-  {
-  }
+  while(!__HAL_PWR_GET_FLAG(PWR_FLAG_VOSRDY)) {}
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48 | RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI48|RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.HSI48State = RCC_HSI48_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
@@ -187,7 +194,9 @@ void SystemClock_Config(void)
   }
   /** Initializes the CPU, AHB and APB buses clocks
   */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2 | RCC_CLOCKTYPE_D3PCLK1 | RCC_CLOCKTYPE_D1PCLK1;
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2
+                              |RCC_CLOCKTYPE_D3PCLK1|RCC_CLOCKTYPE_D1PCLK1;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.SYSCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_HCLK_DIV1;
@@ -215,7 +224,7 @@ void SystemClock_Config(void)
   RCC_CRSInitStruct.Prescaler = RCC_CRS_SYNC_DIV1;
   RCC_CRSInitStruct.Source = RCC_CRS_SYNC_SOURCE_USB2;
   RCC_CRSInitStruct.Polarity = RCC_CRS_SYNC_POLARITY_RISING;
-  RCC_CRSInitStruct.ReloadValue = __HAL_RCC_CRS_RELOADVALUE_CALCULATE(48000000, 1000);
+  RCC_CRSInitStruct.ReloadValue = __HAL_RCC_CRS_RELOADVALUE_CALCULATE(48000000,1000);
   RCC_CRSInitStruct.ErrorLimitValue = 34;
   RCC_CRSInitStruct.HSI48CalibrationValue = 32;
 
@@ -241,7 +250,7 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef USE_FULL_ASSERT
+#ifdef  USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
   *         where the assert_param error has occurred.

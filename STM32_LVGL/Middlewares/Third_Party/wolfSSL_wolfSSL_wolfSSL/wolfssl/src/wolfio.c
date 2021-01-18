@@ -88,16 +88,12 @@ static WC_INLINE int TranslateReturnCode(int old, int sd)
     return old;
 }
 
-static WC_INLINE int wolfSSL_LastError(int err)
+static WC_INLINE int wolfSSL_LastError(void)
 {
-    (void)err; /* Suppress unused arg */
-
 #ifdef USE_WINDOWS_API
     return WSAGetLastError();
 #elif defined(EBSNET)
     return xn_getlasterror();
-#elif defined(WOLFSSL_LINUXKM)
-    return err; /* Return provided error value */
 #else
     return errno;
 #endif
@@ -107,7 +103,6 @@ static WC_INLINE int wolfSSL_LastError(int err)
 
 
 #ifdef OPENSSL_EXTRA
-#ifndef NO_BIO
 /* Use the WOLFSSL read BIO for receiving data. This is set by the function
  * wolfSSL_set_bio and can also be set by wolfSSL_CTX_SetIORecv.
  *
@@ -186,7 +181,7 @@ int BioSend(WOLFSSL* ssl, char *buf, int sz, void *ctx)
     if (ssl->biowr->method && ssl->biowr->method->writeCb) {
         WOLFSSL_MSG("Calling custom biowr");
         sent = ssl->biowr->method->writeCb(ssl->biowr, buf, sz);
-        if ((sent < 0) && (sent != WOLFSSL_CBIO_ERR_WANT_WRITE)) {
+        if (sent < 0) {
             return WOLFSSL_CBIO_ERR_GENERAL;
         }
         return sent;
@@ -209,8 +204,7 @@ int BioSend(WOLFSSL* ssl, char *buf, int sz, void *ctx)
 
     return sent;
 }
-#endif /* !NO_BIO */
-#endif /* OPENSSL_EXTRA */
+#endif
 
 
 #ifdef USE_WOLFSSL_IO
@@ -220,16 +214,12 @@ int BioSend(WOLFSSL* ssl, char *buf, int sz, void *ctx)
  */
 int EmbedReceive(WOLFSSL *ssl, char *buf, int sz, void *ctx)
 {
-    int recvd;
-#ifndef WOLFSSL_LINUXKM
     int sd = *(int*)ctx;
-#else
-    struct socket *sd = (struct socket*)ctx;
-#endif
+    int recvd;
 
     recvd = wolfIO_Recv(sd, buf, sz, ssl->rflags);
     if (recvd < 0) {
-        int err = wolfSSL_LastError(recvd);
+        int err = wolfSSL_LastError();
         WOLFSSL_MSG("Embed Receive error");
 
         if (err == SOCKET_EWOULDBLOCK || err == SOCKET_EAGAIN) {
@@ -266,12 +256,8 @@ int EmbedReceive(WOLFSSL *ssl, char *buf, int sz, void *ctx)
  */
 int EmbedSend(WOLFSSL* ssl, char *buf, int sz, void *ctx)
 {
-    int sent;
-#ifndef WOLFSSL_LINUXKM
     int sd = *(int*)ctx;
-#else
-    struct socket *sd = (struct socket*)ctx;
-#endif
+    int sent;
 
 #ifdef WOLFSSL_MAX_SEND_SZ
     if (sz > WOLFSSL_MAX_SEND_SZ)
@@ -280,7 +266,7 @@ int EmbedSend(WOLFSSL* ssl, char *buf, int sz, void *ctx)
 
     sent = wolfIO_Send(sd, buf, sz, ssl->wflags);
     if (sent < 0) {
-        int err = wolfSSL_LastError(sent);
+        int err = wolfSSL_LastError();
         WOLFSSL_MSG("Embed Send error");
 
         if (err == SOCKET_EWOULDBLOCK || err == SOCKET_EAGAIN) {
@@ -350,17 +336,6 @@ int EmbedReceiveFrom(WOLFSSL *ssl, char *buf, int sz, void *ctx)
                 WOLFSSL_MSG("setsockopt rcvtimeo failed");
         }
     }
-#ifndef NO_ASN_TIME
-    else if(IsSCR(ssl)) {
-        if (ssl->dtls_start_timeout &&
-                LowResTimer() - ssl->dtls_start_timeout > (word32)dtls_timeout) {
-            return WOLFSSL_CBIO_ERR_TIMEOUT;
-        }
-        else if (!ssl->dtls_start_timeout) {
-            ssl->dtls_start_timeout = LowResTimer();
-        }
-    }
-#endif /* !NO_ASN_TIME */
 
     recvd = (int)RECVFROM_FUNCTION(sd, buf, sz, ssl->rflags,
                                   (SOCKADDR*)&peer, &peerSz);
@@ -368,7 +343,7 @@ int EmbedReceiveFrom(WOLFSSL *ssl, char *buf, int sz, void *ctx)
     recvd = TranslateReturnCode(recvd, sd);
 
     if (recvd < 0) {
-        err = wolfSSL_LastError(recvd);
+        err = wolfSSL_LastError();
         WOLFSSL_MSG("Embed Receive From error");
 
         if (err == SOCKET_EWOULDBLOCK || err == SOCKET_EAGAIN) {
@@ -406,9 +381,6 @@ int EmbedReceiveFrom(WOLFSSL *ssl, char *buf, int sz, void *ctx)
             return WOLFSSL_CBIO_ERR_WANT_READ;
         }
     }
-#ifndef NO_ASN_TIME
-    ssl->dtls_start_timeout = 0;
-#endif /* !NO_ASN_TIME */
 
     return recvd;
 }
@@ -433,7 +405,7 @@ int EmbedSendTo(WOLFSSL* ssl, char *buf, int sz, void *ctx)
     sent = TranslateReturnCode(sent, sd);
 
     if (sent < 0) {
-        err = wolfSSL_LastError(sent);
+        err = wolfSSL_LastError();
         WOLFSSL_MSG("Embed Send To error");
 
         if (err == SOCKET_EWOULDBLOCK || err == SOCKET_EAGAIN) {
@@ -481,7 +453,7 @@ int EmbedReceiveFromMcast(WOLFSSL *ssl, char *buf, int sz, void *ctx)
     recvd = TranslateReturnCode(recvd, sd);
 
     if (recvd < 0) {
-        err = wolfSSL_LastError(recvd);
+        err = wolfSSL_LastError();
         WOLFSSL_MSG("Embed Receive From error");
 
         if (err == SOCKET_EWOULDBLOCK || err == SOCKET_EAGAIN) {
@@ -665,28 +637,6 @@ int EmbedGenerateCookie(WOLFSSL* ssl, byte *buf, int sz, void *ctx)
     }
 #endif /* WOLFSSL_SESSION_EXPORT */
 #endif /* WOLFSSL_DTLS */
-
-#ifdef WOLFSSL_LINUXKM
-static int linuxkm_send(struct socket *socket, void *buf, int size,
-    unsigned int flags)
-{
-    int ret;
-    struct kvec vec = { .iov_base = buf, .iov_len = size };
-    struct msghdr msg = { .msg_flags = flags };
-    ret = kernel_sendmsg(socket, &msg, &vec, 1, size);
-    return ret;
-}
-
-static int linuxkm_recv(struct socket *socket, void *buf, int size,
-    unsigned int flags)
-{
-    int ret;
-    struct kvec vec = { .iov_base = buf, .iov_len = size };
-    struct msghdr msg = { .msg_flags = flags };
-    ret = kernel_recvmsg(socket, &msg, &vec, 1, size, msg.msg_flags);
-    return ret;
-}
-#endif /* WOLFSSL_LINUXKM */
 
 
 int wolfIO_Recv(SOCKET_T sd, char *buf, int sz, int rdFlags)
@@ -1128,12 +1078,6 @@ int wolfIO_HttpProcessResponse(int sfd, const char** appStrList,
                 start[len] = 0;
             }
             else {
-                result = TranslateReturnCode(result, sfd);
-                result = wolfSSL_LastError(result);
-                if (result == SOCKET_EWOULDBLOCK || result == SOCKET_EAGAIN) {
-                    return OCSP_WANT_READ;
-                }
-
                 WOLFSSL_MSG("wolfIO_HttpProcessResponse recv http from peer failed");
                 return -1;
             }
@@ -2091,7 +2035,7 @@ void* mynewt_ctx_new() {
     if(!mynewt_ctx) return NULL;
 
     XMEMSET(mynewt_ctx, 0, sizeof(Mynewt_Ctx));
-    mynewt_ctx->mnMemBuffer = (void *)XMALLOC(mempool_bytes, 0, 0);
+    mynewt_ctx->mnMemBuffer = XMALLOC(mempool_bytes, 0, 0);
     if(!mynewt_ctx->mnMemBuffer) {
         mynewt_ctx_clear((void*)mynewt_ctx);
         return NULL;

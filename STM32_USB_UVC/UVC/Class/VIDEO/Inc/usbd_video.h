@@ -58,11 +58,11 @@ extern "C" {
 
 /* These defines shall be updated in the usbd_conf.h file */
 #ifndef UVC_WIDTH
-#define UVC_WIDTH                                     320U
+#define UVC_WIDTH                                     480U
 #endif /* UVC_WIDTH */
 
 #ifndef UVC_HEIGHT
-#define UVC_HEIGHT                                    240U
+#define UVC_HEIGHT                                    272U
 #endif /* UVC_HEIGHT */
 
 #ifndef UVC_CAM_FPS_FS
@@ -70,7 +70,7 @@ extern "C" {
 #endif /* UVC_CAM_FPS_FS */
 
 #ifndef UVC_CAM_FPS_HS
-#define UVC_CAM_FPS_HS                                10U
+#define UVC_CAM_FPS_HS                                5U
 #endif /* UVC_CAM_FPS_HS */
 
 #ifndef UVC_PACKET_SIZE
@@ -78,7 +78,7 @@ extern "C" {
 #endif /* UVC_PACKET_SIZE */
 
 #ifndef UVC_MAX_FRAME_SIZE
-#define UVC_MAX_FRAME_SIZE                            (UVC_WIDTH * UVC_HEIGHT * 3)
+#define UVC_MAX_FRAME_SIZE                            (UVC_WIDTH * UVC_HEIGHT * 2)
 #endif /* UVC_MAX_FRAME_SIZE */
 
 #ifndef UVC_COLOR_PRIMARIE
