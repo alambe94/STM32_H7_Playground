@@ -131,7 +131,7 @@ int main(void)
   extern void JPEG_Thread_Add(void);
   MX_USB_DEVICE_Init();
 
-  LVGL_Thread_Add();
+  //LVGL_Thread_Add();
   JPEG_Thread_Add();
   /* USER CODE END 2 */
 

@@ -4,7 +4,7 @@
 #include "jpeg_encode.h"
 
 #define JPEG_THREAD_STACK_SIZE 1024
-#define JPEG_THREAD_STACK_PRIO 4
+#define JPEG_THREAD_STACK_PRIO 7
 StackType_t JPEG_Thread_Stack[JPEG_THREAD_STACK_SIZE];
 StaticTask_t JPEG_Thread_TCB;
 TaskHandle_t hJPEG_Thread;
@@ -33,9 +33,11 @@ void JPEG_Thread(void *argument)
 {
 	JPEG_InitColorTables();
 
+	vTaskDelay(100);
+
 	while (1)
 	{
-		if (1)
+		if (UVC_Get_Event())
 		{
 			uint32_t out_jpj_sz = 0x00;
 			uint32_t jpj_sz = 0x00;
@@ -43,11 +45,7 @@ void JPEG_Thread(void *argument)
 			uint8_t *in_jpj = LCD_Get_Frame_Buffer();
 			uint8_t *out_jpj = UVC_Get_Frame_Buffer(&out_jpj_sz);
 
-			uint32_t tick = HAL_GetTick();
-
-			extern uint32_t Image_RGB888[];
-			jpj_sz = JPEG_Encode_SW((uint8_t*)Image_RGB888, 320, 240, 3, 75, out_jpj, out_jpj_sz);
-
+			extern uint32_t Image_RGB565[];
 
 //			jpj_sz = JPEG_Encode_HW(&hjpeg,
 //									in_jpj,
@@ -58,28 +56,25 @@ void JPEG_Thread(void *argument)
 //									img_tmp,
 //									out_jpj);
 
-//			JPEG_Encode_HW_DMA(&hjpeg,
-//							   in_jpj,
-//							   480,
-//							   272,
-//							   2,
-//							   75,
-//							   img_tmp,
-//							   out_jpj);
-//
-//			while (!JPEG_Get_Status(&jpj_sz))
-//			{
-//				vTaskDelay(5);
-//			}
+			JPEG_Encode_HW_DMA(&hjpeg,
+					           (uint8_t*)Image_RGB565,
+							   480,
+							   272,
+							   2,
+							   75,
+							   img_tmp,
+							   out_jpj);
+
+			while (!JPEG_Get_Status(&jpj_sz))
+			{
+				vTaskDelay(10);
+			}
 
 			UVC_Set_Event(jpj_sz, 1);
-
-			tick = HAL_GetTick() - tick;
-			tick++;
 		}
 		else
 		{
-			vTaskDelay(10);
+			vTaskDelay(30);
 		}
 	}
 }

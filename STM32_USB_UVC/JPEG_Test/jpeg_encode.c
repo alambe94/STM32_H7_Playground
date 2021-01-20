@@ -124,9 +124,11 @@ void JPEG_Encode_HW_DMA(JPEG_HandleTypeDef *hjpeg,
   // get the numbers of mcus and appropriate function to rgb to ycbcr
   JPEG_GetEncodeColorConvertFunc(&Conf, &pRGBToYCbCr_Convert_Function, &ycbcr_mcu);
 
+  uint32_t tick = HAL_GetTick();
   // convert rgb to ycbcr mcu in one go
   pRGBToYCbCr_Convert_Function(img, ycbcr_tmp, 0, (img_x * img_y * img_bytpp), &ycbcr_size);
 
+  tick = HAL_GetTick() - tick;
   HAL_JPEG_ConfigEncoding(hjpeg, &Conf);
 
   YCBCR_Index = 0x00;
@@ -136,6 +138,9 @@ void JPEG_Encode_HW_DMA(JPEG_HandleTypeDef *hjpeg,
   YCBCR_Packets = YCBCR_Size / YCBCR_Packet_Size;
   YCBCR_Index++;
   YCBCR_IMG += YCBCR_Packet_Size;
+
+  SCB_CleanInvalidateDCache();
+  SCB_InvalidateICache();
 
   // feed ycbcr mcus to jpeg in blocks of YCBCR_Packet_Size
   HAL_JPEG_Encode_DMA(hjpeg, ycbcr_tmp, YCBCR_Packet_Size, jpg_out, 16 * 1024);
