@@ -88,6 +88,7 @@ static const lv_color_t * buf_to_flush;
 static lv_disp_t *our_disp = NULL;
 
 static uintpixel_t *current_frame_buffer;
+static uint8_t frame_refresh_flag;
 /**********************
  *      MACROS
  **********************/
@@ -193,6 +194,7 @@ static void ex_disp_flush(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t 
     }
 #else
 	current_frame_buffer = color_p;
+	frame_refresh_flag = 1;
 	HAL_LTDC_SetAddress(&hltdc, (uint32_t)color_p, 0);
 	lv_disp_flush_ready(&our_disp->driver);
 #endif
@@ -310,7 +312,10 @@ static void DMA2D_Config(void)
 }
 #endif
 
-void *LCD_Get_Frame_Buffer(void)
+uint8_t LCD_Get_Frame_Buffer(uint8_t **buffer)
 {
-	return current_frame_buffer;
+	uint8_t tmp = frame_refresh_flag;
+	*buffer = (uint8_t*)current_frame_buffer;
+	frame_refresh_flag = 0;
+	return tmp;
 }

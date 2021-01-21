@@ -6,7 +6,7 @@
 #include "lv_examples/lv_examples.h"
 
 #define LVGL_THREAD_STACK_SIZE 2048
-#define LVGL_THREAD_STACK_PRIO 5
+#define LVGL_THREAD_STACK_PRIO 7
 StackType_t LVGL_Thread_Stack[LVGL_THREAD_STACK_SIZE];
 StaticTask_t LVGL_Thread_TCB;
 TaskHandle_t hLVGL_Thread;

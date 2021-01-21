@@ -134,7 +134,7 @@ void JPEG_Encode_HW_DMA(JPEG_HandleTypeDef *hjpeg,
   YCBCR_Index = 0x00;
   YCBCR_Size = ycbcr_size;
   YCBCR_IMG = ycbcr_tmp;
-  YCBCR_Packet_Size = 8 * 1024;
+  YCBCR_Packet_Size = 4 * 1024;
   YCBCR_Packets = YCBCR_Size / YCBCR_Packet_Size;
   YCBCR_Index++;
   YCBCR_IMG += YCBCR_Packet_Size;
@@ -178,8 +178,6 @@ void HAL_JPEG_GetDataCallback(JPEG_HandleTypeDef *hjpeg, uint32_t NbEncodedData)
     if (YCBCR_Index > YCBCR_Packets)
     {
       YCBCR_Index = 0x00;
-      // if HAL_JPEG_Pause or HAL_JPEG_ConfigInputBuffer with zero length here then HAL_JPEG_DataReadyCallbackn will not be called
-      HAL_JPEG_ConfigInputBuffer(hjpeg, YCBCR_IMG, 4);
     }
   }
 }
