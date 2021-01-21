@@ -66,11 +66,11 @@ extern "C" {
 #endif /* UVC_HEIGHT */
 
 #ifndef UVC_CAM_FPS_FS
-#define UVC_CAM_FPS_FS                                1U
+#define UVC_CAM_FPS_FS                                10U
 #endif /* UVC_CAM_FPS_FS */
 
 #ifndef UVC_CAM_FPS_HS
-#define UVC_CAM_FPS_HS                                5U
+#define UVC_CAM_FPS_HS                                30U
 #endif /* UVC_CAM_FPS_HS */
 
 #ifndef UVC_PACKET_SIZE
