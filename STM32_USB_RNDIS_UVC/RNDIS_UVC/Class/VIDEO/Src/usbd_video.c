@@ -386,8 +386,8 @@ static uint8_t  USBD_VIDEO_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
     return (uint8_t)USBD_FAIL;
   }
 
-  /* Assign the pClassData pointer to the allocated structure */
-  pdev->pClassData = (void *)hVIDEO;
+  /* Assign the pClassDataUVC pointer to the allocated structure */
+  pdev->pClassDataUVC = (void *)hVIDEO;
 
   /* Open EP IN */
   if (pdev->dev_speed == USBD_SPEED_HIGH)
@@ -406,7 +406,7 @@ static uint8_t  USBD_VIDEO_Init(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
   }
 
   /* Init  physical Interface components */
-  ((USBD_VIDEO_ItfTypeDef *)pdev->pUserData)->Init();
+  ((USBD_VIDEO_ItfTypeDef *)pdev->pUserDataUVC)->Init();
 
   /* Init Xfer states */
   hVIDEO->interface = 0U;
@@ -431,7 +431,7 @@ static uint8_t  USBD_VIDEO_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
   UNUSED(cfgidx);
 
   /* Check if the video structure pointer is valid */
-  if (pdev->pClassData == NULL)
+  if (pdev->pClassDataUVC == NULL)
   {
     return (uint8_t)USBD_FAIL;
   }
@@ -441,9 +441,9 @@ static uint8_t  USBD_VIDEO_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
   pdev->ep_in[UVC_IN_EP & 0xFU].is_used = 0U;
 
   /* DeInit  physical Interface components */
-  ((USBD_VIDEO_ItfTypeDef *)pdev->pUserData)->DeInit();
-  USBD_free(pdev->pClassData);
-  pdev->pClassData = NULL;
+  ((USBD_VIDEO_ItfTypeDef *)pdev->pUserDataUVC)->DeInit();
+  USBD_free(pdev->pClassDataUVC);
+  pdev->pClassDataUVC = NULL;
 
   /* Exit with no error code */
   return (uint8_t)USBD_OK;
@@ -458,7 +458,7 @@ static uint8_t  USBD_VIDEO_DeInit(USBD_HandleTypeDef *pdev, uint8_t cfgidx)
   */
 static uint8_t  USBD_VIDEO_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req)
 {
-  USBD_VIDEO_HandleTypeDef *hVIDEO = (USBD_VIDEO_HandleTypeDef *) pdev->pClassData;
+  USBD_VIDEO_HandleTypeDef *hVIDEO = (USBD_VIDEO_HandleTypeDef *) pdev->pClassDataUVC;
   uint8_t ret = (uint8_t)USBD_OK;
   uint16_t len = 0U;
   uint8_t *pbuf = NULL;
@@ -596,7 +596,7 @@ uint8_t JPEG_IMG_Sent_Flag;
   */
 static uint8_t  USBD_VIDEO_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
 {
-  USBD_VIDEO_HandleTypeDef *hVIDEO = (USBD_VIDEO_HandleTypeDef *) pdev->pClassData;
+  USBD_VIDEO_HandleTypeDef *hVIDEO = (USBD_VIDEO_HandleTypeDef *) pdev->pClassDataUVC;
 
   static uint8_t packet[UVC_PACKET_SIZE];
   static uint8_t frame_toggle;
@@ -660,7 +660,7 @@ static uint8_t  USBD_VIDEO_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
   */
 static uint8_t  USBD_VIDEO_SOF(USBD_HandleTypeDef *pdev)
 {
-  USBD_VIDEO_HandleTypeDef *hVIDEO = (USBD_VIDEO_HandleTypeDef *) pdev->pClassData;
+  USBD_VIDEO_HandleTypeDef *hVIDEO = (USBD_VIDEO_HandleTypeDef *) pdev->pClassDataUVC;
   uint8_t payload[2] = {0x02U, 0x00U};
 
   /* Check if the Streaming has already been started by SetInterface AltSetting 1 */
@@ -706,7 +706,7 @@ static uint8_t USBD_VIDEO_IsoINIncomplete(USBD_HandleTypeDef *pdev, uint8_t epnu
 static void VIDEO_REQ_GetCurrent(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req)
 {
   USBD_VIDEO_HandleTypeDef *hVIDEO;
-  hVIDEO = (USBD_VIDEO_HandleTypeDef *)(pdev->pClassData);
+  hVIDEO = (USBD_VIDEO_HandleTypeDef *)(pdev->pClassDataUVC);
   static __IO uint8_t EntityStatus[8] = {0};
 
   /* Reset buffer to zeros */
@@ -789,7 +789,7 @@ static void VIDEO_REQ_GetCurrent(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef 
   */
 static void VIDEO_REQ_SetCurrent(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef *req)
 {
-  USBD_VIDEO_HandleTypeDef *hVIDEO = (USBD_VIDEO_HandleTypeDef *)(pdev->pClassData);
+  USBD_VIDEO_HandleTypeDef *hVIDEO = (USBD_VIDEO_HandleTypeDef *)(pdev->pClassDataUVC);
 
   /* Check that the request has control data */
   if (req->wLength > 0U)
@@ -1017,7 +1017,7 @@ uint8_t USBD_VIDEO_RegisterInterface(USBD_HandleTypeDef   *pdev, USBD_VIDEO_ItfT
   }
 
   /* Assign the FOPS pointer */
-  pdev->pUserData = fops;
+  pdev->pUserDataUVC = fops;
 
   /* Exit with no error code */
   return (uint8_t)USBD_OK;

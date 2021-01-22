@@ -95,7 +95,7 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p)
   uint8_t *pdata;
   uint32_t Trials = CDC_RNDIS_MAX_TX_WAIT_TRIALS;
 
-  USBD_CDC_RNDIS_HandleTypeDef *hcdc = (USBD_CDC_RNDIS_HandleTypeDef*)(hUsbDeviceHS.pClassData);
+  USBD_CDC_RNDIS_HandleTypeDef *hcdc = (USBD_CDC_RNDIS_HandleTypeDef*)(hUsbDeviceHS.pClassDataRNDIS);
   uint32_t temp = hcdc->TxState;
 
   /* Check if the TX State is not busy */
@@ -145,7 +145,7 @@ static struct pbuf *low_level_input(struct netif *pnetif)
 {
   struct pbuf *p = NULL;
 
-  USBD_CDC_RNDIS_HandleTypeDef *hcdc = (USBD_CDC_RNDIS_HandleTypeDef*)(hUsbDeviceHS.pClassData);
+  USBD_CDC_RNDIS_HandleTypeDef *hcdc = (USBD_CDC_RNDIS_HandleTypeDef*)(hUsbDeviceHS.pClassDataRNDIS);
   uint32_t temp = hcdc->RxState;
 
   /* Get the length of the current buffer */
@@ -180,7 +180,7 @@ void ethernetif_input(struct netif *pnetif)
   err_t err;
   struct pbuf *p;
 
-  USBD_CDC_RNDIS_HandleTypeDef *hcdc = (USBD_CDC_RNDIS_HandleTypeDef*)(hUsbDeviceHS.pClassData);
+  USBD_CDC_RNDIS_HandleTypeDef *hcdc = (USBD_CDC_RNDIS_HandleTypeDef*)(hUsbDeviceHS.pClassDataRNDIS);
 
   /* move received packet into a new pbuf */
   p = low_level_input(pnetif);

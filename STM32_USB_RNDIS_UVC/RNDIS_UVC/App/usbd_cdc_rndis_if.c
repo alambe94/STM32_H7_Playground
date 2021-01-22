@@ -113,7 +113,7 @@ static int8_t CDC_RNDIS_Itf_Init(void)
   */
 static int8_t CDC_RNDIS_Itf_DeInit(void)
 {
-  USBD_CDC_RNDIS_HandleTypeDef *hcdc_cdc_rndis = (USBD_CDC_RNDIS_HandleTypeDef *)(hUsbDeviceHS.pClassData);
+  USBD_CDC_RNDIS_HandleTypeDef *hcdc_cdc_rndis = (USBD_CDC_RNDIS_HandleTypeDef *)(hUsbDeviceHS.pClassDataRNDIS);
 
   /* Notify application layer that link is down */
   hcdc_cdc_rndis->LinkStatus = 0U;
@@ -131,7 +131,7 @@ static int8_t CDC_RNDIS_Itf_DeInit(void)
   */
 static int8_t CDC_RNDIS_Itf_Control(uint8_t cmd, uint8_t *pbuf, uint16_t length)
 {
-  USBD_CDC_RNDIS_HandleTypeDef *hcdc_cdc_rndis = (USBD_CDC_RNDIS_HandleTypeDef *)(hUsbDeviceHS.pClassData);
+  USBD_CDC_RNDIS_HandleTypeDef *hcdc_cdc_rndis = (USBD_CDC_RNDIS_HandleTypeDef *)(hUsbDeviceHS.pClassDataRNDIS);
 
   switch (cmd)
   {
@@ -208,7 +208,7 @@ static void Netif_Config(void)
 static int8_t CDC_RNDIS_Itf_Receive(uint8_t *Buf, uint32_t *Len)
 {
   /* Get the CDC_RNDIS handler pointer */
-  USBD_CDC_RNDIS_HandleTypeDef *hcdc_cdc_rndis = (USBD_CDC_RNDIS_HandleTypeDef *)(hUsbDeviceHS.pClassData);
+  USBD_CDC_RNDIS_HandleTypeDef *hcdc_cdc_rndis = (USBD_CDC_RNDIS_HandleTypeDef *)(hUsbDeviceHS.pClassDataRNDIS);
 
   /* Call Eth buffer processing */
   hcdc_cdc_rndis->RxState = 1U;
@@ -251,7 +251,7 @@ static int8_t CDC_RNDIS_Itf_TransmitCplt(uint8_t *Buf, uint32_t *Len, uint8_t ep
 static int8_t CDC_RNDIS_Itf_Process(USBD_HandleTypeDef *pdev)
 {
   /* Get the CDC_RNDIS handler pointer */
-  USBD_CDC_RNDIS_HandleTypeDef *hcdc_cdc_rndis = (USBD_CDC_RNDIS_HandleTypeDef *)(pdev->pClassData);
+  USBD_CDC_RNDIS_HandleTypeDef *hcdc_cdc_rndis = (USBD_CDC_RNDIS_HandleTypeDef *)(pdev->pClassDataRNDIS);
 
   if ((hcdc_cdc_rndis != NULL) && (hcdc_cdc_rndis->LinkStatus != 0U))
   {

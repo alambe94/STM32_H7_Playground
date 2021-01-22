@@ -26,9 +26,8 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-#include  "usbd_ioreq.h"
-#include  "usbd_composite.h"
-
+#include "usbd_ioreq.h"
+#include "usbd_composite.h"
 /** @addtogroup STM32_USB_DEVICE_LIBRARY
   * @{
   */
@@ -48,11 +47,11 @@ extern "C" {
 #define CDC_RNDIS_CMD_EP                                  COMPOSITE_CDC_RNDIS_CMD_EP  /* EP2 for CDC_RNDIS commands */
 
 #ifndef CDC_RNDIS_CMD_ITF_NBR
-#define CDC_RNDIS_CMD_ITF_NBR                             COMPOSITE_CDC_RNDIS_CMD_ITF_NBR /* Command Interface Number 0 */
+#define CDC_RNDIS_CMD_ITF_NBR                             0x00U /* Command Interface Number 0 */
 #endif /* CDC_RNDIS_CMD_ITF_NBR */
 
 #ifndef CDC_RNDIS_COM_ITF_NBR
-#define CDC_RNDIS_COM_ITF_NBR                             COMPOSITE_CDC_RNDIS_COM_ITF_NBR /* Communication Interface Number 0 */
+#define CDC_RNDIS_COM_ITF_NBR                             0x01U /* Communication Interface Number 0 */
 #endif /* CDC_RNDIS_CMD_ITF_NBR */
 
 #ifndef CDC_RNDIS_HS_BINTERVAL
