@@ -151,7 +151,7 @@ __ALIGN_BEGIN static uint8_t USBD_VIDEO_CfgDesc[] __ALIGN_END =
   /* Interface Association Descriptor */
   USB_IAD_DESC_SIZE,                             /* bLength: Interface Association Descriptor size */
   USB_DESC_TYPE_IAD,                             /* bDescriptorType: interface association */
-  0x00,                                          /* bFirstInterface */
+  UVC_VC_IF_NUM,                                 /* bFirstInterface */
   0x02,                                          /* bInterfaceCount */
   UVC_CC_VIDEO,                                  /* bFunctionClass: Video class */
   SC_VIDEO_INTERFACE_COLLECTION,                 /* bFunctionSubClass: Video Interface Collection */
