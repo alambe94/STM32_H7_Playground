@@ -63,7 +63,7 @@ uint32_t JPEG_Encode_HW(JPEG_HandleTypeDef *hjpeg,
                         uint32_t img_x,     // image width
                         uint32_t img_y,     // image hight
                         uint8_t img_bytpp,  // bytes per pixel
-						uint8_t quality,     // out jpeg quality
+                        uint8_t quality,    // out jpeg quality
                         uint8_t *ycbcr_tmp, // temperory buffer for ycbcr conversion, must be sizes appropriately
                         uint8_t *jpg_out)   // where out jpeg is stored, must be sizes appropriately
 {
@@ -102,7 +102,7 @@ void JPEG_Encode_HW_DMA(JPEG_HandleTypeDef *hjpeg,
                         uint32_t img_x,     // image width
                         uint32_t img_y,     // image hight
                         uint8_t img_bytpp,  // bytes per pixel
-						uint8_t quality,     // out jpeg quality
+                        uint8_t quality,    // out jpeg quality
                         uint8_t *ycbcr_tmp, // temperory buffer for ycbcr conversion, must be sizes appropriately
                         uint8_t *jpg_out)   // where out jpeg is stored, must be sizes appropriately
 {
@@ -124,21 +124,26 @@ void JPEG_Encode_HW_DMA(JPEG_HandleTypeDef *hjpeg,
   // get the numbers of mcus and appropriate function to rgb to ycbcr
   JPEG_GetEncodeColorConvertFunc(&Conf, &pRGBToYCbCr_Convert_Function, &ycbcr_mcu);
 
+  uint32_t tick = HAL_GetTick();
   // convert rgb to ycbcr mcu in one go
   pRGBToYCbCr_Convert_Function(img, ycbcr_tmp, 0, (img_x * img_y * img_bytpp), &ycbcr_size);
 
+  tick = HAL_GetTick() - tick;
   HAL_JPEG_ConfigEncoding(hjpeg, &Conf);
 
   YCBCR_Index = 0x00;
   YCBCR_Size = ycbcr_size;
   YCBCR_IMG = ycbcr_tmp;
-  YCBCR_Packet_Size = 8 * 1024;
+  YCBCR_Packet_Size = 4 * 1024;
   YCBCR_Packets = YCBCR_Size / YCBCR_Packet_Size;
   YCBCR_Index++;
   YCBCR_IMG += YCBCR_Packet_Size;
 
+  SCB_CleanInvalidateDCache();
+  SCB_InvalidateICache();
+
   // feed ycbcr mcus to jpeg in blocks of YCBCR_Packet_Size
-  HAL_JPEG_Encode_DMA(hjpeg, ycbcr_tmp, YCBCR_Packet_Size, jpg_out, 16 * 1024);
+  HAL_JPEG_Encode_DMA(hjpeg, ycbcr_tmp, YCBCR_Packet_Size, jpg_out, 32 * 1024);
 }
 
 // poll encoding status if using dma mode
@@ -173,8 +178,6 @@ void HAL_JPEG_GetDataCallback(JPEG_HandleTypeDef *hjpeg, uint32_t NbEncodedData)
     if (YCBCR_Index > YCBCR_Packets)
     {
       YCBCR_Index = 0x00;
-      // if HAL_JPEG_Pause or HAL_JPEG_ConfigInputBuffer with zero length here then HAL_JPEG_DataReadyCallbackn will not be called
-      HAL_JPEG_ConfigInputBuffer(hjpeg, YCBCR_IMG, 4);
     }
   }
 }

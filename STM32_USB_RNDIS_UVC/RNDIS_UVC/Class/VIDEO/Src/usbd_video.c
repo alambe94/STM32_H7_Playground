@@ -182,7 +182,7 @@ __ALIGN_BEGIN static uint8_t USBD_VIDEO_CfgDesc[] __ALIGN_END =
   0xDC,
   0x02,
   0x01,                                          /* bInCollection: number of streaming interfaces */
-  0x01,                                          /* baInterfaceNr(1): VideoStreaming interface 1 is part of VC interface */
+  UVC_VS_IF_NUM,                                 /* baInterfaceNr(1): VideoStreaming interface 1 is part of VC interface */
 
   /* Input Terminal Descriptor */
   VIDEO_IN_TERMINAL_DESC_SIZE,                   /* bLength: Input terminal descriptor size */
