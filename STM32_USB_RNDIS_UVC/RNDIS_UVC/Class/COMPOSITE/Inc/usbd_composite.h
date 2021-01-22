@@ -51,9 +51,7 @@ extern "C" {
 #define COMPOSITE_UVC_VC_IF_NUM                                     0x02U
 #define COMPOSITE_UVC_VS_IF_NUM                                     0x03U
 
-#define USB_COMPOSITE_CONFIG_DESC_SIZ                               202U
-
-extern USBD_ClassTypeDef USBD_COMPOSITE;
+#define USB_COMPOSITE_CONFIG_DESC_SIZ                               (UVC_CONFIG_DESC_SIZ + CDC_RNDIS_CONFIG_DESC_SIZ - 0x09)
 
 /**
   * @}
@@ -82,7 +80,7 @@ extern USBD_ClassTypeDef USBD_COMPOSITE;
   * @{
   */
 
-extern USBD_ClassTypeDef USBD_COMPOSITE_ClassDriver;
+extern USBD_ClassTypeDef USBD_COMPOSITE;
 /**
   * @}
   */

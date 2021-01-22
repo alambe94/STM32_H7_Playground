@@ -135,9 +135,9 @@ __ALIGN_BEGIN static uint8_t USBD_COMPOSITE_HSCfgDesc[USB_COMPOSITE_CONFIG_DESC_
 	/* Configuration Descriptor */
 	USB_CONF_DESC_SIZE,                            /* bLength: Configuration Descriptor size */
 	USB_DESC_TYPE_CONFIGURATION,                   /* bDescriptorType: Configuration */
-	LOBYTE(USB_COMPOSITE_CONFIG_DESC_SIZ),                   /* wTotalLength: no of returned bytes */
+	LOBYTE(USB_COMPOSITE_CONFIG_DESC_SIZ),         /* wTotalLength: no of returned bytes */
 	HIBYTE(USB_COMPOSITE_CONFIG_DESC_SIZ),
-	0x04,                                          /* bNumInterfaces: 2 interface */
+	0x04,                                          /* bNumInterfaces: 4 interface */
 	0x01,                                          /* bConfigurationValue: Configuration value */
 	0x00,                                          /* iConfiguration: Index of string descriptor describing the configuration */
 	#if (USBD_SELF_POWERED == 1U)
