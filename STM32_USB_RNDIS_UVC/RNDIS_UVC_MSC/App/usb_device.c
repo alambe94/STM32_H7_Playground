@@ -27,6 +27,7 @@
 #include "usbd_composite.h"
 #include "usbd_cdc_rndis_if.h"
 #include "usbd_video_if.h"
+#include "usbd_msc_storage.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -83,6 +84,10 @@ void MX_USB_DEVICE_Init(void)
     Error_Handler();
   }
   if (USBD_VIDEO_RegisterInterface(&hUsbDeviceHS, &USBD_VIDEO_fops_FS) != USBD_OK)
+  {
+    Error_Handler();
+  }
+  if (USBD_MSC_RegisterStorage(&hUsbDeviceHS, &USBD_MSC_Template_fops) != USBD_OK)
   {
     Error_Handler();
   }

@@ -45,13 +45,16 @@ extern "C" {
 #define COMPOSITE_CDC_RNDIS_OUT_EP                                  0x01U  /* EP1 for data OUT */
 #define COMPOSITE_CDC_RNDIS_CMD_EP                                  0x82U  /* EP2 for CDC_RNDIS commands */
 #define COMPOSITE_UVC_IN_EP                                         0x83U
+#define COMPOSITE_MSC_EPIN_ADDR                                     0x84U
+#define COMPOSITE_MSC_EPOUT_ADDR                                    0x02U
 
 #define COMPOSITE_CDC_RNDIS_CMD_ITF_NBR                             0x00U /* Command Interface Number 0 */
 #define COMPOSITE_CDC_RNDIS_COM_ITF_NBR                             0x01U /* Communication Interface Number 0 */
 #define COMPOSITE_UVC_VC_IF_NUM                                     0x02U
 #define COMPOSITE_UVC_VS_IF_NUM                                     0x03U
+#define COMPOSITE_MSC_ITF_NBR                                       0x04U
 
-#define USB_COMPOSITE_CONFIG_DESC_SIZ                               (UVC_CONFIG_DESC_SIZ + CDC_RNDIS_CONFIG_DESC_SIZ - 0x09)
+#define USB_COMPOSITE_CONFIG_DESC_SIZ                               (UVC_CONFIG_DESC_SIZ + CDC_RNDIS_CONFIG_DESC_SIZ + USB_MSC_CONFIG_DESC_SIZ - 0x09)
 
 /**
   * @}

@@ -75,7 +75,7 @@ extern "C" {
 #endif /* UVC_CAM_FPS_HS */
 
 #ifndef UVC_PACKET_SIZE
-#define UVC_PACKET_SIZE                               1024U
+#define UVC_PACKET_SIZE                               512U
 #endif /* UVC_PACKET_SIZE */
 
 #ifndef UVC_MAX_FRAME_SIZE
@@ -117,7 +117,7 @@ extern "C" {
 #endif
 
 #ifndef UVC_ISO_HS_MPS
-#define UVC_ISO_HS_MPS                                1024U
+#define UVC_ISO_HS_MPS                                512U
 #endif
 
 #ifndef UVC_HEADER_PACKET_CNT

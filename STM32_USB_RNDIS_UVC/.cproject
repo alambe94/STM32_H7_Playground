@@ -47,12 +47,6 @@
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/LwIP/src/apps/http"/>
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/LwIP/system"/>
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/LwIP/src/include"/>
-									<listOptionValue builtIn="false" value="../RNDIS_UVC/Core/Inc"/>
-									<listOptionValue builtIn="false" value="../RNDIS_UVC/Target"/>
-									<listOptionValue builtIn="false" value="../RNDIS_UVC/App"/>
-									<listOptionValue builtIn="false" value="../RNDIS_UVC/Class/CDC_RNDIS/Inc"/>
-									<listOptionValue builtIn="false" value="../RNDIS_UVC/Class/VIDEO/Inc"/>
-									<listOptionValue builtIn="false" value="../RNDIS_UVC/Class/COMPOSITE/Inc"/>
 									<listOptionValue builtIn="false" value="../LIBJPEG/Target"/>
 									<listOptionValue builtIn="false" value="../LIBJPEG/App"/>
 									<listOptionValue builtIn="false" value="../Utilities/JPEG"/>
@@ -62,6 +56,13 @@
 									<listOptionValue builtIn="false" value="../Drivers/CMSIS/Device/ST/STM32H7xx/Include"/>
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/LibJPEG/include"/>
 									<listOptionValue builtIn="false" value="../Drivers/STM32H7xx_HAL_Driver/Inc"/>
+									<listOptionValue builtIn="false" value="../RNDIS_UVC_MSC/Core/Inc"/>
+									<listOptionValue builtIn="false" value="../RNDIS_UVC_MSC/Target"/>
+									<listOptionValue builtIn="false" value="../RNDIS_UVC_MSC/App"/>
+									<listOptionValue builtIn="false" value="../RNDIS_UVC_MSC/Class/CDC_RNDIS/Inc"/>
+									<listOptionValue builtIn="false" value="../RNDIS_UVC_MSC/Class/VIDEO/Inc"/>
+									<listOptionValue builtIn="false" value="../RNDIS_UVC_MSC/Class/COMPOSITE/Inc"/>
+									<listOptionValue builtIn="false" value="../RNDIS_UVC_MSC/Class/MSC/Inc"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1278205996" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -88,14 +89,14 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="JPEG_Test"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="LIBJPEG"/>
 						<entry excluding="App/fsdata_custom.c" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="LWIP"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="JPEG_Test"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Utilities"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="RNDIS_UVC"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="RNDIS_UVC_MSC"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Utilities"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -160,6 +161,7 @@
 									<listOptionValue builtIn="false" value="../Drivers/CMSIS/Device/ST/STM32H7xx/Include"/>
 									<listOptionValue builtIn="false" value="../Middlewares/Third_Party/LibJPEG/include"/>
 									<listOptionValue builtIn="false" value="../Drivers/STM32H7xx_HAL_Driver/Inc"/>
+									<listOptionValue builtIn="false" value="../RNDIS_UVC/Class/MSC/Inc"/>
 								</option>
 								<inputType id="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c.1990953908" superClass="com.st.stm32cube.ide.mcu.gnu.managedbuild.tool.c.compiler.input.c"/>
 							</tool>
@@ -186,13 +188,13 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="LIBJPEG"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Core"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Utilities"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="LIBJPEG"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="LWIP"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Middlewares"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Drivers"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="RNDIS_UVC"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="RNDIS_UVC_MSC"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="Utilities"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

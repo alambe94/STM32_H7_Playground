@@ -308,6 +308,8 @@ typedef struct _USBD_HandleTypeDef
   void                    *pUserDataRNDIS;
   void                    *pClassDataUVC;
   void                    *pUserDataUVC;
+  void                    *pClassDataMSC;
+  void                    *pUserDataMSC;
   void                    *pData;
   void                    *pBosDesc;
   void                    *pConfDesc;

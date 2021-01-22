@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>STM32_USB_RNDIS_UVC</name>
+	<name>STM32_USB_RNDIS_UVC_MSC</name>
 	<comment></comment>
 	<projects>
 	</projects>
