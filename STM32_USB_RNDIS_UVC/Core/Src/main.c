@@ -28,6 +28,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "usb_device.h"
+#include "jpeg_encode.h"
 #include "usbd_cdc_rndis_if.h"
 #include "lwip/netif.h"
 /* USER CODE END Includes */
@@ -103,6 +104,35 @@ int main(void)
   MX_USB_OTG_HS_PCD_Init();
   /* USER CODE BEGIN 2 */
   MX_USB_DEVICE_Init();
+
+  uint32_t out_sz = 0;
+  uint32_t snt_cnt = 0;
+  uint32_t tm_stmp = 0;
+
+  extern void UVC_Set_Event(uint32_t size, uint8_t encoded_flag);
+  extern void *UVC_Get_Frame_Buffer(uint32_t *size);
+  uint8_t UVC_Get_Event(void);
+
+  extern uint32_t Image_RGB888[];
+  extern uint32_t Image_RGB565[];
+
+  JPEG_InitColorTables();
+  static uint8_t img_tmp[320 * 240 * 2];
+  uint8_t *out_jpj = UVC_Get_Frame_Buffer(&out_sz);
+
+  JPEG_Encode_HW_DMA(&hjpeg,
+                     (uint8_t *)Image_RGB565,
+                     320,
+                     240,
+                     2,
+                     75,
+                     img_tmp,
+                     out_jpj);
+
+  while (!JPEG_Get_Status(&out_sz));
+
+  UVC_Set_Event(out_sz, 1);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */

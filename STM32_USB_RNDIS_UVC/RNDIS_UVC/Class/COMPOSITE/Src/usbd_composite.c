@@ -272,7 +272,7 @@ __ALIGN_BEGIN static uint8_t USBD_COMPOSITE_HSCfgDesc[USB_COMPOSITE_CONFIG_DESC_
 	0xDC,
 	0x02,
 	0x01,                                          /* bInCollection: number of streaming interfaces */
-	0x01,                                          /* baInterfaceNr(1): VideoStreaming interface 1 is part of VC interface */
+	UVC_VS_IF_NUM,                                 /* baInterfaceNr(1): VideoStreaming interface 1 is part of VC interface */
 
 	/* Input Terminal Descriptor */
 	VIDEO_IN_TERMINAL_DESC_SIZE,                   /* bLength: Input terminal descriptor size */
@@ -531,7 +531,7 @@ __ALIGN_BEGIN static uint8_t USBD_COMPOSITE_FSCfgDesc[USB_COMPOSITE_CONFIG_DESC_
 	0xDC,
 	0x02,
 	0x01,                                          /* bInCollection: number of streaming interfaces */
-	0x01,                                          /* baInterfaceNr(1): VideoStreaming interface 1 is part of VC interface */
+	UVC_VS_IF_NUM,                                 /* baInterfaceNr(1): VideoStreaming interface 1 is part of VC interface */
 
 	/* Input Terminal Descriptor */
 	VIDEO_IN_TERMINAL_DESC_SIZE,                   /* bLength: Input terminal descriptor size */
