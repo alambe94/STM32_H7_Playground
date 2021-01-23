@@ -35,6 +35,7 @@ extern SD_HandleTypeDef hsd1;
 
 /* USER CODE BEGIN BeforeInitSection */
 /* can be used to modify / undefine following code or add code */
+#if 0
 /* USER CODE END BeforeInitSection */
 /**
   * @brief  Initializes the SD card device.
@@ -63,7 +64,37 @@ __weak uint8_t BSP_SD_Init(void)
   return sd_state;
 }
 /* USER CODE BEGIN AfterInitSection */
+#endif
 /* can be used to modify previous code / undefine following code / add code */
+uint8_t BSP_SD_Init(void)
+{
+  uint8_t sd_state = MSD_OK;
+
+  hsd1.Init.ClockDiv = SDMMC_NSpeed_CLK_DIV;
+
+  /* Check if the SD card is plugged in the slot */
+  if (BSP_SD_IsDetected() != SD_PRESENT)
+  {
+    return MSD_ERROR_SD_NOT_PRESENT;
+  }
+  /* HAL SD initialization */
+  sd_state = HAL_SD_Init(&hsd1);
+  /* Configure SD Bus width (4 bits mode selected) */
+  if (sd_state == MSD_OK)
+  {
+    /* Enable wide operation */
+    if (HAL_SD_ConfigWideBusOperation(&hsd1, SDMMC_BUS_WIDE_4B) != HAL_OK)
+    {
+      sd_state = MSD_ERROR;
+    }
+    else
+    {
+    	sd_state = HAL_SD_ConfigSpeedBusOperation(&hsd1, SDMMC_SPEED_MODE_HIGH);
+    }
+  }
+
+  return sd_state;
+}
 /* USER CODE END AfterInitSection */
 
 /* USER CODE BEGIN InterruptMode */
