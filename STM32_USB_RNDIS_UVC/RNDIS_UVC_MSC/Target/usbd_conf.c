@@ -424,7 +424,7 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
   HAL_PCD_RegisterIsoOutIncpltCallback(&hpcd_USB_OTG_HS, PCD_ISOOUTIncompleteCallback);
   HAL_PCD_RegisterIsoInIncpltCallback(&hpcd_USB_OTG_HS, PCD_ISOINIncompleteCallback);
 #endif /* USE_HAL_PCD_REGISTER_CALLBACKS */
-  HAL_PCDEx_SetRxFiFo(&hpcd_USB_OTG_HS, 1024+512);
+  HAL_PCDEx_SetRxFiFo(&hpcd_USB_OTG_HS, 1024);
 
   HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_HS, 0, 64);  // EP0 IN
 

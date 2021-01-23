@@ -58,11 +58,11 @@ extern "C" {
 
 /* These defines shall be updated in the usbd_conf.h file */
 #ifndef UVC_WIDTH
-#define UVC_WIDTH                                     480U
+#define UVC_WIDTH                                     320U
 #endif /* UVC_WIDTH */
 
 #ifndef UVC_HEIGHT
-#define UVC_HEIGHT                                    272U
+#define UVC_HEIGHT                                    240U
 #endif /* UVC_HEIGHT */
 
 #ifndef UVC_CAM_FPS_FS
