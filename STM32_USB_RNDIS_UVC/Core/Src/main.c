@@ -129,33 +129,33 @@ int main(void)
 	extern USBD_HandleTypeDef  hUsbDeviceHS;
 	USBD_CDC_RNDIS_fops.Process(&hUsbDeviceHS);
 
-//	uint8_t *out_jpj = UVC_Get_Frame_Buffer(&out_sz);
-//
-//	JPEG_Encode_HW_DMA(&hjpeg,
-//					 (uint8_t *)Image_RGB565,
-//					 320,
-//					 240,
-//					 2,
-//					 75,
-//					 img_tmp,
-//					 out_jpj);
-//	HAL_Delay(1);
-//	while (!JPEG_Get_Status(&out_sz));
-//
-//	UVC_Set_Event(out_sz, 1);
-//
-//	while(!UVC_Get_Event())
-//	{
-//
-//	}
-//	snt_cnt++;
-//
-//	if(HAL_GetTick() - tm_stmp >= 1000)
-//	{
-//		FPS = snt_cnt;
-//		snt_cnt = 0;
-//		tm_stmp = HAL_GetTick();
-//	}
+	uint8_t *out_jpj = UVC_Get_Frame_Buffer(&out_sz);
+
+	JPEG_Encode_HW_DMA(&hjpeg,
+					 (uint8_t *)Image_RGB565,
+					 320,
+					 240,
+					 2,
+					 75,
+					 img_tmp,
+					 out_jpj);
+	HAL_Delay(1);
+	while (!JPEG_Get_Status(&out_sz));
+
+	UVC_Set_Event(out_sz, 1);
+
+	//while(!UVC_Get_Event())
+	{
+
+	}
+	snt_cnt++;
+
+	if(HAL_GetTick() - tm_stmp >= 1000)
+	{
+		FPS = snt_cnt;
+		snt_cnt = 0;
+		tm_stmp = HAL_GetTick();
+	}
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
