@@ -579,7 +579,8 @@ static uint8_t  USBD_VIDEO_Setup(USBD_HandleTypeDef *pdev, USBD_SetupReqTypedef 
   return ret;
 }
 
-uint8_t JPEG_IMG[32*1024];
+uint8_t JPEG_IMG[2][32*1024];
+uint8_t JPEG_Current_IMG;
 uint32_t JPEG_Image_Size;
 uint32_t JPEG_Packet_CNT;
 uint32_t JPEG_Packet_Size;
@@ -624,12 +625,12 @@ static uint8_t  USBD_VIDEO_DataIn(USBD_HandleTypeDef *pdev, uint8_t epnum)
 		  hVIDEO->sof = 0;
 		  packet[0] = 0x02;
 		  packet[1] = frame_toggle;
-		  (void)USBD_memcpy((packet + 2U), (JPEG_IMG+image_index), PcktSze);
+		  (void)USBD_memcpy((packet + 2U), (JPEG_IMG[JPEG_Current_IMG]+image_index), PcktSze);
 		  SndCnt = PcktSze+2;
 	  }
 	  else
 	  {
-		  (void)USBD_memcpy(packet, (JPEG_IMG+image_index), PcktSze);
+		  (void)USBD_memcpy(packet, (JPEG_IMG[JPEG_Current_IMG]+image_index), PcktSze);
 		  SndCnt = PcktSze;
 	  }
 
@@ -1024,12 +1025,14 @@ uint8_t USBD_VIDEO_RegisterInterface(USBD_HandleTypeDef   *pdev, USBD_VIDEO_ItfT
 
 void *UVC_Get_Frame_Buffer(uint32_t *size)
 {
-	*size = sizeof(JPEG_IMG);
-	return JPEG_IMG;
+	*size = sizeof(JPEG_IMG[0]);
+	return JPEG_IMG[JPEG_Current_IMG ^ 0x01];
 }
 
 void UVC_Set_Event(uint32_t size, uint8_t encoded_flag)
-{
+{	
+  JPEG_Current_IMG ^= 0x01;
+
 	JPEG_Image_Size = size;
 	JPEG_Packet_CNT = JPEG_Image_Size/(UVC_PACKET_SIZE-2);
 	JPEG_Packet_Size = (UVC_PACKET_SIZE-2);

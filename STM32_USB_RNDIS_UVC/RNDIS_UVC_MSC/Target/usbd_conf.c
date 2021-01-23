@@ -424,17 +424,17 @@ USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
   HAL_PCD_RegisterIsoOutIncpltCallback(&hpcd_USB_OTG_HS, PCD_ISOOUTIncompleteCallback);
   HAL_PCD_RegisterIsoInIncpltCallback(&hpcd_USB_OTG_HS, PCD_ISOINIncompleteCallback);
 #endif /* USE_HAL_PCD_REGISTER_CALLBACKS */
-  HAL_PCDEx_SetRxFiFo(&hpcd_USB_OTG_HS, 0x200);
+  HAL_PCDEx_SetRxFiFo(&hpcd_USB_OTG_HS, 1024+512);
 
-  HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_HS, 0, 0x40);  // EP0 IN
+  HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_HS, 0, 64);  // EP0 IN
 
-  HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_HS, 1, 0x200); // COMPOSITE_CDC_RNDIS_IN_EP
+  HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_HS, 1, 512); // COMPOSITE_CDC_RNDIS_IN_EP
 
-  HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_HS, 2, 0x40);  // COMPOSITE_CDC_RNDIS_CMD_EP
+  HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_HS, 2, 64);  // COMPOSITE_CDC_RNDIS_CMD_EP
 
-  HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_HS, 3, 0x200); // COMPOSITE_UVC_IN_EP
+  HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_HS, 3, 512); // COMPOSITE_UVC_IN_EP
 
-  HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_HS, 4, 0x200); // COMPOSITE_MSC_EPIN_ADDR
+  HAL_PCDEx_SetTxFiFo(&hpcd_USB_OTG_HS, 4, 512); // COMPOSITE_MSC_EPIN_ADDR
   }
   return USBD_OK;
 }

@@ -151,7 +151,7 @@ __ALIGN_BEGIN static uint8_t USBD_VIDEO_CfgDesc[] __ALIGN_END =
   /* Interface Association Descriptor */
   USB_IAD_DESC_SIZE,                             /* bLength: Interface Association Descriptor size */
   USB_DESC_TYPE_IAD,                             /* bDescriptorType: interface association */
-  0x00,                                          /* bFirstInterface */
+  UVC_VC_IF_NUM,                                 /* bFirstInterface */
   0x02,                                          /* bInterfaceCount */
   UVC_CC_VIDEO,                                  /* bFunctionClass: Video class */
   SC_VIDEO_INTERFACE_COLLECTION,                 /* bFunctionSubClass: Video Interface Collection */
@@ -182,7 +182,7 @@ __ALIGN_BEGIN static uint8_t USBD_VIDEO_CfgDesc[] __ALIGN_END =
   0xDC,
   0x02,
   0x01,                                          /* bInCollection: number of streaming interfaces */
-  0x01,                                          /* baInterfaceNr(1): VideoStreaming interface 1 is part of VC interface */
+  UVC_VS_IF_NUM,                                 /* baInterfaceNr(1): VideoStreaming interface 1 is part of VC interface */
 
   /* Input Terminal Descriptor */
   VIDEO_IN_TERMINAL_DESC_SIZE,                   /* bLength: Input terminal descriptor size */
@@ -297,7 +297,7 @@ __ALIGN_BEGIN static uint8_t USBD_VIDEO_CfgDesc[] __ALIGN_END =
   UVC_IN_EP,                                     /* bEndpointAddress */
   0x05,                                          /* bmAttributes: ISO transfer */
   LOBYTE(UVC_ISO_HS_MPS),                        /* wMaxPacketSize */
-  LOBYTE(UVC_ISO_HS_MPS),
+  HIBYTE(UVC_ISO_HS_MPS),
   0x01,                                          /* bInterval: 1 frame interval */
 };
 
