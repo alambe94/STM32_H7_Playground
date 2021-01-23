@@ -28,7 +28,7 @@
 
 /**
 	MiddleWare name : wolfSSL.wolfSSL.4.5.0
-	MiddleWare fileName : ./wolfSSL.wolfSSL_conf.h
+	MiddleWare fileName : wolfSSL.wolfSSL_conf.h
 	MiddleWare version :
 */
 /*---------- WOLF_CONF_DEBUG -----------*/

@@ -129,10 +129,12 @@ int main(void)
   /* USER CODE BEGIN 2 */
   extern void LVGL_Thread_Add(void);
   extern void JPEG_Thread_Add(void);
+  extern void RNDIS_Thread_Add(void);
   MX_USB_DEVICE_Init();
 
   LVGL_Thread_Add();
   JPEG_Thread_Add();
+  RNDIS_Thread_Add();
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in freertos.c) */
